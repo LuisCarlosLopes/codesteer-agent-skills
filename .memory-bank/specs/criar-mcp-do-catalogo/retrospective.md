@@ -1,5 +1,5 @@
 # Retrospective: criar-mcp-do-catalogo — 2026-09-14
-> **Agent:** codesteer.task-retrospective | **Status:** partial
+> **Agent:** codesteer.task-retrospective | **Status:** success
 > **Track:** FEATURE
 
 ## Resumo executivo
@@ -7,7 +7,7 @@
 - Cadeia FEATURE (implementer → verifier → code-reviewer → tester) concluiu T1–T6 do IPD v1.0 sem blocker e sem healing.
 - Entrega: servidor MCP stdio local (`@codesteer/agent-skills-mcp`) com as 4 tools, progressive disclosure e SHA-256; `pnpm test` 40/40 após o tester.
 - Principal aprendizado: sem `vitest.config`, o alias `@codesteer/skills-catalog` serve o typecheck mas não o runtime — import relativo foi o desvio correto e de baixo impacto.
-- Closure git/PR autorizado pelo orquestrador (implementer operou com `commit_policy: none`); execução registrada nas seções Fechamento git e Pull Request.
+- Closure git/PR autorizado pelo orquestrador (implementer operou com `commit_policy: none`): commit `16b7596` e [PR #1](https://github.com/LuisCarlosLopes/codesteer-agent-skills/pull/1) (sem merge).
 
 ## Contexto
 
@@ -134,18 +134,16 @@
 
 | Campo | Valor |
 |---|---|
-| Resultado | a realizar nesta fase |
-| Hash | — |
-| Mensagem | — |
+| Resultado | realizado |
+| Hash | `16b75964f320bf1ad9cbaa585804403fbe50803c` |
+| Mensagem | `feat(mcp): add stdio catalog server with hash-gated disclosure` |
 
 ### Arquivos incluídos no commit
 
-(previsto — stage seletivo, sem `git add .`)
-
-- `packages/mcp-server/**`
+- `packages/mcp-server/**` (pacote, src, specs, tsconfig, project.json)
 - `packages/skills-catalog/src/index.ts`
 - `tsconfig.base.json`, `package.json`, `pnpm-lock.yaml`, `README.md`, `CLAUDE.md`
-- `.memory-bank/specs/criar-mcp-do-catalogo/**` (specs versionadas; inclui este `retrospective.md`)
+- `.memory-bank/specs/criar-mcp-do-catalogo/**` (delivery, quality, code-review, state, retrospective)
 
 ### Arquivos excluídos do stage (com motivo)
 
@@ -159,19 +157,19 @@
 
 ### Motivo de bloqueio (se aplicável)
 
-Nenhum até a persistência do report. Commit/PR seguem após este arquivo.
+Nenhum. Stage seletivo; branch `feat/` não protegida; quality APROVADO.
 
 ## Pull Request
 
 | Campo | Valor |
 |---|---|
-| Resultado | a realizar nesta fase |
-| URL | — |
-| Título | — |
+| Resultado | aberta |
+| URL | https://github.com/LuisCarlosLopes/codesteer-agent-skills/pull/1 |
+| Título | `feat(mcp): add stdio catalog server with hash-gated disclosure` |
 
 ### Motivo de bloqueio (se aplicável)
 
-Nenhum até a persistência do report. `gh pr list --head feat/criar-mcp-do-catalogo` estava vazio.
+Nenhum. PR não existia; push regular (sem force); merge não executado.
 
 ## Próximos passos recomendados
 
