@@ -1,0 +1,25 @@
+{
+  "name": "skills-catalog",
+  "sourceRoot": "packages/skills-catalog/src",
+  "projectType": "library",
+  "targets": {
+    "compile": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm compile:catalog"
+      }
+    },
+    "scan": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm scan:skills"
+      }
+    },
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run packages/skills-catalog"
+      }
+    }
+  }
+}

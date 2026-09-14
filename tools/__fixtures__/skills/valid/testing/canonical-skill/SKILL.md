@@ -1,0 +1,18 @@
+---
+name: canonical-skill
+description: Use when testing a valid catalog skill. Do NOT use for production agents.
+metadata:
+  version: 0.0.1
+  author: "@codesteer"
+  license: Apache-2.0
+compatibility:
+  min_agent_tier: 1
+  requires_terminal: false
+sandbox:
+  network: false
+  allow_exec: false
+---
+
+# Canonical skill
+
+Valid fixture for the structural validator.

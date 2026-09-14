@@ -1,1 +1,6 @@
 cognitive-base/.obsidian/
+node_modules/
+dist/
+.nx/
+coverage/
+.memory-bank/plans/

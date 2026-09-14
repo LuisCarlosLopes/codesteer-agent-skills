@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strict": true,
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "noImplicitAny": true,
+    "noEmit": true,
+    "allowImportingTsExtensions": true,
+    "types": ["node"],
+    "baseUrl": ".",
+    "paths": {
+      "@codesteer/skills-catalog": ["packages/skills-catalog/src/types.ts"]
+    }
+  },
+  "include": [
+    "packages/skills-catalog/src/**/*.ts",
+    "tools/**/*.ts"
+  ]
+}

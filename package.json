@@ -1,0 +1,25 @@
+{
+  "name": "codesteer-agent-skills",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "test": "tsc --noEmit -p tsconfig.base.json && vitest run",
+    "validate:skills": "tsx tools/validate-skills.ts",
+    "scan:skills": "tsx packages/skills-catalog/src/scan-skills.ts",
+    "compile:catalog": "tsx packages/skills-catalog/src/compile-catalog.ts"
+  },
+  "devDependencies": {
+    "@types/js-yaml": "4.0.9",
+    "@types/node": "22.15.29",
+    "js-yaml": "4.1.1",
+    "nx": "21.4.1",
+    "tsx": "4.20.5",
+    "typescript": "5.8.3",
+    "vitest": "3.2.4"
+  }
+}

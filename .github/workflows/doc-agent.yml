@@ -1,0 +1,78 @@
+# doc-agent — sugere a nota da Base Cognitiva correspondente a cada PR
+#
+# Instalado pelo cb-init a partir de skills/cb-init/assets/doc-agent.yml.
+# Determinístico: mapeia prefixo do título do PR / labels → quadrante + type
+# e mantém UM comentário fixo (sticky) no PR com a sugestão. A criação da
+# nota continua sendo feita por um humano (ou agente) via cb-note — este
+# workflow apenas lembra, nunca escreve na base.
+
+name: doc-agent
+
+on:
+  pull_request:
+    types: [opened, edited, labeled, unlabeled]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  suggest-note:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const MARKER = '<!-- cb-doc-agent -->';
+            const pr = context.payload.pull_request;
+            const title = (pr.title || '').toLowerCase();
+            const labels = pr.labels.map(l => l.name.toLowerCase());
+
+            // Mapeamento (mesma tabela do cb-init, Passo 5)
+            const rules = [
+              { test: () => labels.includes('ai-correction'),
+                quadrante: 'cognitive-base/decisions/ai-corrections/', type: 'ai-correction',
+                motivo: 'label `ai-correction`' },
+              { test: () => labels.includes('guide') || /^docs\(guide\)/.test(title),
+                quadrante: 'cognitive-base/guides/', type: 'how-to',
+                motivo: 'label `guide` / prefixo `docs(guide):`' },
+              { test: () => /^chore\(migration\)/.test(title),
+                quadrante: 'cognitive-base/system/', type: 'table',
+                motivo: 'prefixo `chore(migration):`' },
+              { test: () => /^refactor(\(.+\))?!/.test(title),
+                quadrante: 'cognitive-base/decisions/', type: 'adr',
+                motivo: 'refactor com breaking change (`!`)' },
+              { test: () => /^fix/.test(title),
+                quadrante: 'cognitive-base/ops/', type: 'incident',
+                motivo: 'prefixo `fix:` — avalie se houve incidente real' },
+              { test: () => /^feat/.test(title),
+                quadrante: 'cognitive-base/specs/', type: 'feature',
+                motivo: 'prefixo `feat:`' },
+            ];
+
+            const match = rules.find(r => r.test());
+            const body = match
+              ? [
+                  MARKER,
+                  '### 📚 Base Cognitiva — sugestão de nota',
+                  '',
+                  `| Quadrante | Type | Gatilho |`,
+                  `|---|---|---|`,
+                  `| \`${match.quadrante}\` | \`${match.type}\` | ${match.motivo} |`,
+                  '',
+                  'Crie o rascunho via **cb-note** (`documenta este PR na base cognitiva`).',
+                  'Toda nota nasce `draft` — a promoção a `approved` é revisão humana.',
+                ].join('\n')
+              : null;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              ...context.repo, issue_number: pr.number, per_page: 100,
+            });
+            const existing = comments.find(c => c.body && c.body.startsWith(MARKER));
+
+            if (body && existing) {
+              await github.rest.issues.updateComment({ ...context.repo, comment_id: existing.id, body });
+            } else if (body && !existing) {
+              await github.rest.issues.createComment({ ...context.repo, issue_number: pr.number, body });
+            } else if (!body && existing) {
+              await github.rest.issues.deleteComment({ ...context.repo, comment_id: existing.id });
+            }

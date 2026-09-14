@@ -1,0 +1,23 @@
+# doc-quality — gate de qualidade da Base Cognitiva em todo PR que toca .md
+#
+# Instalado pelo cb-init a partir de skills/cb-init/assets/doc-quality.yml.
+# Roda EXATAMENTE o mesmo auditor determinístico do cb-audit local
+# (.github/scripts/cb/audit.py, copiado da skill cb-audit na inicialização)
+# — os achados do CI e da auditoria local concordam por construção.
+
+name: doc-quality
+
+on:
+  pull_request:
+    paths:
+      - 'cognitive-base/**.md'
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Auditar base cognitiva (checks críticos)
+        run: |
+          python3 .github/scripts/cb/audit.py --base cognitive-base --fail-on critical
