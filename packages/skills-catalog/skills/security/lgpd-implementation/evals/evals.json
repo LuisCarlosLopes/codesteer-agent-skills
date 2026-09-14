@@ -1,0 +1,35 @@
+{
+  "skill_name": "codesteer-lgpd-implementation-review",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "Quero revisar um SaaS em Next.js com backend Node e Postgres para ver se a LGPD esta realmente implementada. Temos cadastro com nome, e-mail, telefone, CPF opcional, cookies de analytics e envio de eventos para um CRM. Procure no repo os fluxos de coleta, diga o que esta implementado, o que esta parcial e exponha os pontos vulneraveis com evidencia tecnica.",
+      "expected_output": "A skill conduz uma auditoria por evidencias reais do repositorio, organiza os achados por dominios de LGPD e prioriza lacunas como consentimento, sobrecoleta, terceiros, direitos do titular, retencao e seguranca.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "Preciso implementar o minimo serio de LGPD no meu produto antes de colocar em producao. Temos login, perfil, exportacao CSV de usuarios por admin e logs de aplicacao enviados para um provedor externo. Monte um plano de implementacao por ordem de risco e, onde fizer sentido, proponha mudancas concretas em codigo e processos.",
+      "expected_output": "A skill separa diagnostico de implementacao, cria um plano pragmatico por prioridade, vincula cada mudanca a um risco de privacidade e nao esconde dependencias de juridico, DPO ou operacao.",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "Nosso app mobile coleta geolocalizacao, foto de perfil e data de nascimento. O marketing quer ligar push, analytics e recomendacao personalizada por padrao. Use a skill para avaliar se isso faz sentido sob LGPD, apontar gaps de base legal, consentimento e minimizacao, e mostrar o que ficaria vulneravel se implementarmos desse jeito.",
+      "expected_output": "A skill detecta riscos de coleta excessiva, finalidades opcionais ativadas por padrao, ausencia de segregacao de consentimento e necessidade de controles reforcados para dados de maior risco.",
+      "files": []
+    },
+    {
+      "id": 4,
+      "prompt": "Somos uma autarquia e temos um portal que coleta CPF, endereco, anexos com documentos e historico de solicitacoes do cidadao. Quero validar LGPD no contexto de poder publico, com foco em base legal, compartilhamento entre orgaos, transparencia, encarregado e resposta ao titular. Nao quero um checklist generico de SaaS privado.",
+      "expected_output": "A skill trata o bloco especifico de poder publico como regime proprio, diferencia exigencias publicas das de produto privado e aponta lacunas tecnicas e operacionais com evidencias.",
+      "files": []
+    },
+    {
+      "id": 5,
+      "prompt": "Temos um motor antifraude que bloqueia cadastro, reduz limite e manda casos para revisao automatica usando score interno e sinais de dispositivo. Avalie os riscos de LGPD, especialmente decisao automatizada, perfilizacao, transparencia, logs e possibilidade de revisao humana.",
+      "expected_output": "A skill identifica o tema de decisao automatizada e perfilizacao como eixo central do diagnostico, conecta isso a transparencia e revisao, e nao limita a analise a consentimento e seguranca.",
+      "files": []
+    }
+  ]
+}
