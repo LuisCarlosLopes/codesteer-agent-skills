@@ -1,0 +1,252 @@
+slug: criar-mcp-do-catalogo
+updated_at: "2026-09-14T21:55:00-03:00"
+
+request:
+  original: "/codesteer implemente"
+  summary: >
+    Implementar servidor MCP stdio do catálogo local com progressive disclosure
+    e verificação SHA-256 no pacote novo packages/mcp-server, executando T1–T6
+    do IPD já existente.
+  work_type: feature
+  scope:
+    in:
+      - "packages/mcp-server (pacote @codesteer/agent-skills-mcp, private)"
+      - "reexport compileCatalog via packages/skills-catalog/src/index.ts"
+      - "tools MCP: search_skills, read_skill, fetch_skill_files, prepare_skill_files"
+      - "testes Vitest em tmpdir (Seção 6 do IPD)"
+      - "docs locais: README.md e CLAUDE.md"
+    out:
+      - "libs/core, CLI, portal, embeddings, registry HTTP, npm publish"
+      - "cognitive-base/**, ci.yml, doc-*, validate-skills.ts, compile-catalog.ts (salvo reexport)"
+      - "fixtures em packages/skills-catalog/skills/"
+  constraints:
+    - "read_skill não devolve corpo de references/ nem scripts/"
+    - "hash mismatch não entrega conteúdo; stdout reservado ao protocolo MCP"
+    - "deps novas só Seção 4.4 do IPD, pin exato"
+    - "não criar libs/core, CLI, portal, embeddings, registry HTTP nem npm publish"
+  acceptance_criteria:
+    - "pnpm mcp:catalog sobe servidor stdio com as 4 tools"
+    - "pnpm test (tsc + vitest) verde, incluindo Seção 6"
+    - "progressive disclosure e SHA-256 conforme contrato 2.3"
+  artifacts_referenced:
+    - ".memory-bank/plans/criar-mcp-do-catalogo/plan.md"
+    - ".memory-bank/plans/criar-mcp-do-catalogo/architecture.md"
+    - ".memory-bank/plans/criar-mcp-do-catalogo/task.md"
+
+artifacts:
+  plan: ".memory-bank/plans/criar-mcp-do-catalogo/plan.md"
+  architecture: ".memory-bank/plans/criar-mcp-do-catalogo/architecture.md"
+  task: ".memory-bank/plans/criar-mcp-do-catalogo/task.md"
+  spec: null
+  delivery: ".memory-bank/specs/criar-mcp-do-catalogo/delivery.md"
+  quality: ".memory-bank/specs/criar-mcp-do-catalogo/quality.md"
+  code_review: ".memory-bank/specs/criar-mcp-do-catalogo/code-review.md"
+
+squad:
+  track: FEATURE
+  score: 5
+  score_signals:
+    - multi_module
+    - architecture_decision
+    - cross_task_dependency
+    - independent_validation
+  confidence: high
+  confidence_score: 93
+  track_override: false
+  last_assessment_ref: "skills/codesteer-task-complexity/references/scoring-rubric.md"
+  complexity_ipd: L
+  current_phase: closure
+  completed_phases:
+    - bootstrap
+    - implementer
+    - verifier
+    - code-reviewer
+    - tester
+  next_phase: codesteer.task-retrospective
+  waiting_on: task-retrospective
+  terminal_state: none
+  blockers: []
+  active_chain: []
+  gates_skipped: []
+  autonomy: supervised
+  auto_approvals: []
+  commit_authorization: none
+  commit_policy: none
+  delivery_chain:
+    - codesteer.implementer
+    - codesteer.verifier
+    - codesteer.code-reviewer
+    - codesteer.tester
+  closure_phase: codesteer.task-retrospective
+  metrics:
+    phases:
+      - phase: bootstrap
+        agent: codesteer.orchestrator
+        status: success
+        bytes_read: 44516
+        bytes_written: 6966
+        artifacts_written:
+          - { path: "state.yaml", bytes: 6966 }
+      - phase: implementer
+        agent: codesteer.implementer
+        status: success
+        bytes_read: 51482
+        bytes_written: 15418
+        artifacts_written:
+          - { path: "delivery.md", bytes: 8312 }
+          - { path: "../../plans/criar-mcp-do-catalogo/task.md", bytes: 7106 }
+      - phase: verifier
+        agent: codesteer.verifier
+        status: success
+        bytes_read: 59828
+        bytes_written: 9283
+        artifacts_written:
+          - { path: "quality.md", bytes: 9283 }
+      - phase: code-reviewer
+        agent: codesteer.code-reviewer
+        status: success
+        bytes_read: 51482
+        bytes_written: 5707
+        artifacts_written:
+          - { path: "code-review.md", bytes: 5707 }
+      - phase: tester
+        agent: codesteer.tester
+        status: success
+        bytes_read: 51482
+        bytes_written: 10273
+        artifacts_written:
+          - { path: "../../../packages/mcp-server/src/catalog/fetch.spec.ts", bytes: 5190 }
+          - { path: "../../../packages/mcp-server/src/catalog/prepare.spec.ts", bytes: 5083 }
+  debate_round: 0
+  debate_history: []
+  healing_attempt: 0
+  healing_history: []
+  spec_debate_round: 0
+  spec_debate_history: []
+
+assessment:
+  assessment_version: "1.0"
+  score: 5
+  track_suggested: FEATURE
+  confidence: high
+  confidence_score: 93
+  signals:
+    - id: multi_module
+      label: "Múltiplos arquivos ou módulos"
+      weight: 1
+      applied: true
+      evidence: "Pacote novo packages/mcp-server + reexport do catálogo + tsconfig/package.json + README/CLAUDE.md"
+    - id: architecture_decision
+      label: "Decisão arquitetural de produto"
+      weight: 2
+      applied: true
+      evidence: "Servidor MCP stdio, progressive disclosure, SHA-256 e FastMCP (Decision Register do ARD)"
+    - id: cross_task_dependency
+      label: "Dependência entre subtarefas"
+      weight: 1
+      applied: true
+      evidence: "T1 wiring → T2 domínio → T3 handlers → T4 FastMCP → T5 testes → T6 docs"
+    - id: independent_validation
+      label: "Validação independente"
+      weight: 1
+      applied: true
+      evidence: "Vitest Seção 6 do IPD + pnpm test na raiz; verifier e code-reviewer compostos"
+    - id: irreversible_effect
+      label: "Deploy ou efeito irreversível"
+      weight: 2
+      applied: false
+      evidence: "MCP local stdio; sem deploy, migration ou publish"
+    - id: subjective_acceptance
+      label: "Critério de aceite subjetivo"
+      weight: 1
+      applied: false
+      evidence: "DoD e casos da Seção 6 são objetivos e verificáveis"
+  dimensions:
+    scope_surface: 3
+    architecture_decision: 2
+    cross_task_dependency: 1
+    independent_validation: 1
+    irreversible_effect: 0
+    subjective_acceptance: 0
+  overrides:
+    bugfix_root_unknown: false
+    hotfix_production: false
+    track_override_requested: false
+  hitl_recommended: true
+  liminal_score: true
+  rationale: >
+    Feature multi-módulo com decisões arquiteturais de produto e validação
+    independente; sem efeito irreversível. Score 5 é limítrofe FEATURE, alinhado
+    ao IPD v1.0 (FEATURE, complexidade L). Track confirmado pelo humano via
+    /codesteer implemente sobre este IPD.
+  canonical_rubric_ref: "skills/codesteer-task-complexity/references/scoring-rubric.md"
+
+hitl:
+  status: resolved
+  gates:
+    - id: hitl-track-scope
+      status: resolved
+      by: human
+      decision: "Track FEATURE confirmado. IPD v1.0 já classifica FEATURE (score 5 limítrofe, complexidade L). Humano pediu implementação deste slug."
+    - id: hitl-pre-planner
+      status: resolved
+      by: human
+      decision: "IPD + ARD + task.md já existem em .memory-bank/plans/criar-mcp-do-catalogo/. Humano avançou para implementação."
+    - id: hitl-pre-implementer
+      status: resolved
+      by: human
+      decision: "Pedido /codesteer implemente = autorização explícita para implementar T1–T6 agora."
+      commit_authorization: none
+      delivery_chain:
+        - codesteer.implementer
+        - codesteer.verifier
+        - codesteer.code-reviewer
+        - codesteer.tester
+      closure: codesteer.task-retrospective
+      notes: >
+        commit_policy none: humano autorizou implementar, não commitar.
+        Closure (retrospective) fecha commit/PR na iteração seguinte.
+        Verifier obrigatório por complexidade L. Tester obrigatório (superfície
+        testável). Code-reviewer obrigatório (mudança de código). Nenhum gate dispensado.
+
+history:
+  - at: "2026-09-14T20:36:00-03:00"
+    agent: codesteer.orchestrator
+    status: success
+    phase: bootstrap
+    note: >
+      Bootstrap inline sem specs/ prévio. Slug reaproveitado de
+      .memory-bank/plans/criar-mcp-do-catalogo/. Assessment score 5 FEATURE.
+      Gates HITL resolvidos por autorização humana implemente.
+      next_phase: codesteer.implementer.
+  - at: "2026-09-14T21:10:00-03:00"
+    agent: codesteer.implementer
+    status: success
+    phase: implementer
+    artifact: ".memory-bank/specs/criar-mcp-do-catalogo/delivery.md"
+    note: >
+      Status Final Completa. T1–T6 CONCLUÍDA. pnpm test 36/36.
+      3 divergências baixas. Sem blocker. Cadeia segue para verifier.
+  - at: "2026-09-14T21:25:00-03:00"
+    agent: codesteer.verifier
+    status: success
+    phase: verifier
+    artifact: ".memory-bank/specs/criar-mcp-do-catalogo/quality.md"
+    note: >
+      Veredicto APROVADO. 19 PASSOU, 2 N/A justificados.
+      Divergências baixas aceitas. Cadeia segue para code-reviewer.
+  - at: "2026-09-14T21:40:00-03:00"
+    agent: codesteer.code-reviewer
+    status: success
+    phase: code-reviewer
+    artifact: ".memory-bank/specs/criar-mcp-do-catalogo/code-review.md"
+    note: >
+      Recomendação APROVAR. 0 CRÍTICO/ALTO/MÉDIO, 1 BAIXO (prepare
+      relê disco após hash). Cadeia segue para tester.
+  - at: "2026-09-14T21:55:00-03:00"
+    agent: codesteer.tester
+    status: success
+    phase: tester
+    note: >
+      4 testes de gap (templates/, SKILL.md, HashMismatch no prepare).
+      pnpm test 40/40. Delivery-chain encerrada. Closure na próxima iteração.
