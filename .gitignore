@@ -4,3 +4,6 @@ dist/
 .nx/
 coverage/
 .memory-bank/plans/
+.github/.DS_Store
+cognitive-base/.DS_Store
+.DS_Store
