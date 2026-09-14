@@ -7,3 +7,4 @@ coverage/
 .github/.DS_Store
 cognitive-base/.DS_Store
 .DS_Store
+.memory-bank/specs/
