@@ -32,7 +32,7 @@ Pacote `packages/skills-catalog`: fonte editável das [[meta/glossary#skill|skil
 - Guarda skills em `skills/<categoria>/<nome>/` no formato canônico ([[dec-002-formato-canonico-skill]]).
 - `src/compile-catalog.ts` gera `skills-registry.json` (cadastro + [[meta/glossary#content-hash|content hashes]]) e `embeddings.json` ([[meta/glossary#embeddings|embeddings]] da `description`).
 - `src/scan-skills.ts` alimenta o scanner de segurança da CI ([[dec-005-integridade-supply-chain]]).
-- Categorias iniciais previstas: `(architecture)`, `(security)`, `(testing)`.
+- Categorias previstas: `(architecture)`, `(security)`, `(testing)`, `(product)` — PO, planning, grill-me, PRD.
 
 Não entrega skill ao agente — isso é CLI/MCP. Não é a UI humana — isso é [[sys-005-portal-web]].
 
@@ -61,4 +61,5 @@ Engenharia de Arquitetura de Software · `@luiscarloslopesjr`
 
 | Versão | Data       | Autor                | Descrição |
 | ------ | ---------- | -------------------- | --------- |
+| 1.1.0  | 2026-09-14 | @luiscarloslopesjr   | Categoria `product` (PO, planning, grill-me, PRD) |
 | 1.0.0  | 2026-09-14 | @luiscarloslopesjr   | Overview alvo extraído do blueprint ASP |

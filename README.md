@@ -4,7 +4,7 @@ Plataforma de catálogo de skills para agentes de IA. Nesta fatia, **subir uma s
 
 ## Como adicionar uma skill
 
-1. Crie `packages/skills-catalog/skills/<categoria>/<nome-kebab>/SKILL.md` (categorias iniciais: `architecture`, `security`, `testing`).
+1. Crie `packages/skills-catalog/skills/<categoria>/<nome-kebab>/SKILL.md` (categorias: `architecture`, `security`, `testing`, `product` — PO, planning, grill-me, PRD).
 2. O frontmatter precisa de `name` (igual à pasta), `description` com **"Use when"** e **"Do NOT use for"**, `metadata`, `compatibility` e `sandbox`.
 3. Não coloque `README.md` dentro da pasta da skill. Manuais longos vão em `references/`; scripts em `scripts/`.
 4. O corpo de `SKILL.md` tem no máximo 500 linhas. Pastas e arquivos em kebab-case.
@@ -13,6 +13,7 @@ Scaffold:
 
 ```bash
 pnpm exec tsx tools/skill-generator/generate.ts testing minha-skill
+pnpm exec tsx tools/skill-generator/generate.ts product grill-me
 ```
 
 ## Gates locais (os mesmos da CI)

@@ -349,7 +349,8 @@ agent-skills-platform/
 │   │   ├── skills/
 │   │   │   ├── (architecture)/
 │   │   │   ├── (security)/
-│   │   │   └── (testing)/
+│   │   │   ├── (testing)/
+│   │   │   └── (product)/
 │   │   ├── src/
 │   │   │   ├── compile-catalog.ts # Compilação de hashes e json
 │   │   │   └── scan-skills.ts     # Scanner de segurança
