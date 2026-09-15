@@ -13,11 +13,12 @@
     "types": ["node"],
     "baseUrl": ".",
     "paths": {
-      "@codesteer/skills-catalog": ["packages/skills-catalog/src/types.ts"]
+      "@codesteer/skills-catalog": ["packages/skills-catalog/src/index.ts"]
     }
   },
   "include": [
     "packages/skills-catalog/src/**/*.ts",
+    "packages/mcp-server/src/**/*.ts",
     "tools/**/*.ts"
   ]
 }

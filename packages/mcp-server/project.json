@@ -1,0 +1,13 @@
+{
+  "name": "mcp-server",
+  "sourceRoot": "packages/mcp-server/src",
+  "projectType": "library",
+  "targets": {
+    "test": {
+      "executor": "nx:run-commands",
+      "options": {
+        "command": "pnpm exec vitest run packages/mcp-server"
+      }
+    }
+  }
+}
