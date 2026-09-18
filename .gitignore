@@ -8,4 +8,6 @@ coverage/
 cognitive-base/.DS_Store
 .DS_Store
 .memory-bank/specs/
+.memory-bank/design/
 .cursor/
+design-systems/
