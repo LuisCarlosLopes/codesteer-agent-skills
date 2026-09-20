@@ -98,7 +98,7 @@ As 4 tools, nesta ordem — cada uma entrega só o que a anterior não cobriu:
 2. Preencha o frontmatter de `SKILL.md`: `name` (igual à pasta), `description` com **"Use when"** e **"Do NOT use for"** (literais em inglês), `metadata`, `compatibility` e `sandbox`.
 3. Não coloque `README.md` na pasta da skill. Manuais longos vão em `references/`; scripts em `scripts/`; templates em `templates/`.
 4. Corpo de `SKILL.md` ≤ 500 linhas. Pastas e arquivos em kebab-case.
-5. Abra um PR. A CI roda os mesmos gates locais abaixo.
+5. (Maintainer) Abra um PR interno. A CI roda os mesmos gates locais abaixo. Contribuições externas ainda não são aceitas.
 
 ---
 
@@ -137,3 +137,13 @@ arquitetura_plataforma_skills_mcp.md   # blueprint ASP (alvo completo)
 O blueprint descreve CLI, portal web, `libs/core`, registry HTTP e embeddings. **Esta fatia implementa** autoria + gates + compilação do registry + MCP stdio + página HTML no GitHub Pages. Consumir o catálogo no agente é `pnpm mcp:catalog`.
 
 Formato canônico: [`cognitive-base/decisions/dec-002-formato-canonico-skill.md`](cognitive-base/decisions/dec-002-formato-canonico-skill.md).
+
+---
+
+## Licença
+
+[Apache License 2.0](LICENSE). Uso, cópia, modificação e distribuição livres — inclusive comercial — desde que a licença e os avisos de copyright sejam preservados.
+
+## Contribuições
+
+Contribuições externas **não são aceitas** neste momento. Issues estão desativadas; PRs de forks são fechados automaticamente. Veja [CONTRIBUTING.md](CONTRIBUTING.md). O fluxo “Como adicionar uma skill” acima é para o maintainer do repositório.
