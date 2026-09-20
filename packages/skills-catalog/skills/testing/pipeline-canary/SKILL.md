@@ -1,5 +1,5 @@
 ---
-name: catalog-smoke
+name: pipeline-canary
 description: Use when verifying the skills catalog pipeline is healthy. Do NOT use for production agent workflows or feature implementation.
 metadata:
   version: 0.0.1
@@ -13,6 +13,6 @@ sandbox:
   allow_exec: false
 ---
 
-# Catalog smoke
+# Pipeline canary
 
 Confirms that the catalog authoring pipeline accepts a canonical skill.

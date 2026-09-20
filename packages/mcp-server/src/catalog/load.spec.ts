@@ -63,7 +63,7 @@ describe('catalog/load', () => {
 
     expect(catalog.catalogRoot).toBe(path.resolve(catalogRoot));
     expect(catalog.registry.skills.map((skill) => skill.name)).toEqual(['tmp-only-skill']);
-    expect(catalog.registry.skills.some((skill) => skill.name === 'catalog-smoke')).toBe(false);
+    expect(catalog.registry.skills.some((skill) => skill.name === 'pipeline-canary')).toBe(false);
     expect(path.resolve(catalog.catalogRoot)).not.toBe(path.resolve(officialCatalogRoot));
   });
 });

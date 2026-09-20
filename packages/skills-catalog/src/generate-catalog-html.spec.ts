@@ -32,7 +32,7 @@ describe('generate-catalog-html', () => {
   it('grava HTML com name, category, description das skills do registry', () => {
     const outPath = path.join(mkdtempSync(path.join(tmpdir(), 'catalog-html-write-')), 'index.html');
     const skill = sampleSkill({
-      name: 'catalog-smoke',
+      name: 'pipeline-canary',
       category: 'testing',
       description: 'Use when verifying the catalog pipeline. Do NOT use for production agents.',
       version: '0.0.1',
@@ -44,7 +44,7 @@ describe('generate-catalog-html', () => {
     expect(result.outPath).toBe(outPath);
     expect(result.skillCount).toBe(1);
     const html = readFileSync(outPath, 'utf8');
-    expect(html).toContain('catalog-smoke');
+    expect(html).toContain('pipeline-canary');
     expect(html).toContain('testing');
     expect(html).toContain('Use when verifying the catalog pipeline. Do NOT use for production agents.');
     expect(html).toContain('0.0.1');
@@ -97,7 +97,7 @@ describe('generate-catalog-html', () => {
       category: 'product',
     });
     const smoke = sampleSkill({
-      name: 'catalog-smoke',
+      name: 'pipeline-canary',
       description: 'Use when compiling the catalog. Do NOT use for production agents.',
       category: 'testing',
     });
@@ -117,9 +117,9 @@ describe('generate-catalog-html', () => {
 
     expect(byName.skillCount).toBe(1);
     expect(byName.html).toContain('codesteer-grill-me');
-    expect(byName.html).not.toContain('catalog-smoke');
+    expect(byName.html).not.toContain('pipeline-canary');
     expect(byDescription.skillCount).toBe(1);
-    expect(byDescription.html).toContain('catalog-smoke');
+    expect(byDescription.html).toContain('pipeline-canary');
     expect(omitted.skillCount).toBe(2);
   });
 
