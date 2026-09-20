@@ -87,6 +87,39 @@ As 4 tools, nesta ordem — cada uma entrega só o que a anterior não cobriu:
 
 ---
 
+## Instalar uma skill individual (sem MCP)
+
+Se você deseja usar apenas uma skill específica sem manter o servidor MCP ativo, pode instalar a pasta canônica diretamente no seu projeto ou ambiente global via **symlink** (recomendado para manter sincronizado com atualizações do catálogo) ou **cópia direta**.
+
+### Mapeamento de diretórios por Agente / IDE
+
+| Agente / IDE | Escopo do Projeto (Local) | Escopo Global (Usuário) |
+| :--- | :--- | :--- |
+| **Cursor** | `.cursor/skills/<nome-skill>/` | `~/.cursor/skills/<nome-skill>/` |
+| **Claude Code** | `.claude/skills/<nome-skill>/` | `~/.claude/skills/<nome-skill>/` |
+| **Google Antigravity** | `.agent/skills/<nome-skill>/` ou `.gemini/skills/<nome-skill>/` | `~/.gemini/antigravity-cli/skills/<nome-skill>/` |
+| **GitHub Copilot** | `.github/skills/<nome-skill>/` | — |
+| **Windsurf** | `.windsurf/skills/<nome-skill>/` | `~/.windsurf/skills/<nome-skill>/` |
+| **Cline / Roo Code** | `.cline/skills/<nome-skill>/` | `~/.cline/skills/<nome-skill>/` |
+
+### Exemplo de instalação (macOS / Linux)
+
+No seu projeto de destino:
+
+```bash
+# Método 1: Symlink (recomendado — reflete git pull do catálogo)
+mkdir -p .cursor/skills
+ln -s "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/codesteer-grill-me" .cursor/skills/codesteer-grill-me
+
+# Método 2: Cópia direta (isolamento total)
+mkdir -p .cursor/skills
+cp -R "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/codesteer-grill-me" .cursor/skills/codesteer-grill-me
+```
+
+O agente lerá o `SKILL.md` automaticamente e ativará as instruções com base no gatilho `"Use when"` definido no frontmatter, consultando as pastas `references/` e `templates/` sob demanda.
+
+---
+
 ## Como adicionar uma skill
 
 1. Scaffold (categoria + nome, ambos kebab-case):
@@ -134,7 +167,7 @@ cognitive-base/            # decisões e specs (Obsidian, 6 quadrantes)
 arquitetura_plataforma_skills_mcp.md   # blueprint ASP (alvo completo)
 ```
 
-O blueprint descreve CLI, portal web, `libs/core`, registry HTTP e embeddings. **Esta fatia implementa** autoria + gates + compilação do registry + MCP stdio + página HTML no GitHub Pages. Consumir o catálogo no agente é `pnpm mcp:catalog`.
+O blueprint descreve CLI, portal web, `libs/core`, registry HTTP e embeddings. **Esta fatia implementa** autoria + gates + compilação do registry + MCP stdio + página HTML no GitHub Pages. O consumo no agente pode ser dinâmico via MCP (`pnpm mcp:catalog`) ou estático via instalação direta (symlink/cópia) de cada skill.
 
 Formato canônico: [`cognitive-base/decisions/dec-002-formato-canonico-skill.md`](cognitive-base/decisions/dec-002-formato-canonico-skill.md).
 
