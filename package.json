@@ -2,6 +2,7 @@
   "name": "codesteer-agent-skills",
   "version": "0.0.1",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@9.15.9",
   "engines": {
@@ -12,6 +13,7 @@
     "validate:skills": "tsx tools/validate-skills.ts",
     "scan:skills": "tsx packages/skills-catalog/src/scan-skills.ts",
     "compile:catalog": "tsx packages/skills-catalog/src/compile-catalog.ts",
+    "catalog:html": "tsx packages/skills-catalog/src/generate-catalog-html.ts",
     "mcp:catalog": "tsx packages/mcp-server/src/index.ts"
   },
   "devDependencies": {

@@ -161,6 +161,7 @@ def check_status_invalido(notas: list[dict[str, Any]], achados: dict[str, list[s
 
 def check_wikilinks_quebrados(notas: list[dict[str, Any]], achados: dict[str, list[str]]) -> None:
     nomes_existentes = {n["nome"] for n in notas}
+    nomes_existentes |= {os.path.splitext(artefato)[0] for artefato in ARTEFATOS}
     for n in notas:
         for i, linha in enumerate(n["content"].splitlines(), 1):
             for alvo in re.findall(r"\[\[([^\]|#]+)(?:[|#][^\]]*)?\]\]", linha):

@@ -4,7 +4,7 @@ type: service
 title: MCP server — canal dinâmico com progressive disclosure
 status: draft
 created: "2026-09-14"
-updated: "2026-09-14"
+updated: "2026-09-20"
 author: "@luiscarloslopesjr"
 links:
   - id: gd-001
@@ -13,6 +13,8 @@ links:
     rel: depends-on
   - id: sys-002
     rel: depends-on
+  - id: dec-006
+    rel: related-to
 tags: [service, mcp, progressive-disclosure]
 source: greenfield
 migration_status: ""
@@ -50,6 +52,8 @@ Tools (ordem de [[meta/glossary#progressive-disclosure|progressive disclosure]])
 
 `prepare_skill_files` não executa o script; no enterprise o runtime usa [[meta/glossary#sandbox|sandbox]] `ASP_EXECUTION_MODE=container`.
 
+À parte dessa cadeia, a tool `generate_catalog_html` (filtros opcionais de categoria, nome e descrição) devolve HTML auto-contido do catálogo ao chamador. Importa `generateCatalogHtml` de [[sys-001-skills-catalog]]; não é o 5º passo de disclosure nem substitui `search_skills` ([[dec-006-catalogo-html-estatico-github-pages]]).
+
 ## Dependências
 
 - `libs/core` para fetch, hash e resolução de registry ([[sys-002-libs-core]]).
@@ -69,9 +73,11 @@ Engenharia de Arquitetura de Software · `@luiscarloslopesjr`
 - [[gd-001-visao-geral-arquitetura]] — MCP entre storage e agentes tool-based
 - [[dec-005-integridade-supply-chain]] — revalidação de hash no `read_skill`
 - [[sys-003-cli-agent-skills]] — canal irmão (arquivos no disco)
+- [[dec-006-catalogo-html-estatico-github-pages]] — HTML do catálogo via import, sem spawn
 
 ## Histórico
 
 | Versão | Data       | Autor                | Descrição |
 | ------ | ---------- | -------------------- | --------- |
+| 1.1.0  | 2026-09-20 | @luiscarloslopesjr   | Tool adjacente `generate_catalog_html` ([[dec-006-catalogo-html-estatico-github-pages]]) |
 | 1.0.0  | 2026-09-14 | @luiscarloslopesjr   | Overview alvo extraído do blueprint ASP |

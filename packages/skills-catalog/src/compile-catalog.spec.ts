@@ -55,9 +55,9 @@ describe('compile-catalog', () => {
     expect(written.skills).toEqual([]);
   });
 
-  it('inclui catalog-smoke com files[].contentHash sha256 hex', () => {
+  it('inclui pipeline-canary com files[].contentHash sha256 hex', () => {
     const catalogRoot = path.join(repoRoot, 'packages', 'skills-catalog');
-    const outPath = path.join(mkdtempSync(path.join(tmpdir(), 'compile-smoke-')), 'skills-registry.json');
+    const outPath = path.join(mkdtempSync(path.join(tmpdir(), 'compile-canary-')), 'skills-registry.json');
     const { registry } = compileCatalog({
       skillsRoot: path.join(catalogRoot, 'skills'),
       catalogRoot,
@@ -65,13 +65,13 @@ describe('compile-catalog', () => {
       generatedAt: '2026-09-14T00:00:00.000Z',
     });
 
-    const smoke = registry.skills.find((skill) => skill.name === 'catalog-smoke');
-    expect(smoke).toBeDefined();
-    expect(smoke?.category).toBe('testing');
-    expect(smoke?.path).toBe('skills/testing/catalog-smoke');
-    const skillMd = smoke?.files.find((file) => file.path === 'SKILL.md');
+    const canary = registry.skills.find((skill) => skill.name === 'pipeline-canary');
+    expect(canary).toBeDefined();
+    expect(canary?.category).toBe('testing');
+    expect(canary?.path).toBe('skills/testing/pipeline-canary');
+    const skillMd = canary?.files.find((file) => file.path === 'SKILL.md');
     expect(skillMd?.contentHash).toMatch(/^[a-f0-9]{64}$/);
-    const disk = readFileSync(path.join(catalogRoot, 'skills', 'testing', 'catalog-smoke', 'SKILL.md'));
+    const disk = readFileSync(path.join(catalogRoot, 'skills', 'testing', 'pipeline-canary', 'SKILL.md'));
     expect(skillMd?.contentHash).toBe(sha256(disk));
   });
 

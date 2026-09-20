@@ -9,11 +9,12 @@ Node >= 22, pnpm 9 (`packageManager` fixa a versão). Nx está instalado mas os 
 ```bash
 pnpm install
 
-# Os 4 gates — idênticos aos passos do .github/workflows/ci.yml
+# Os gates — idênticos aos passos do .github/workflows/ci.yml
 pnpm test              # tsc --noEmit -p tsconfig.base.json && vitest run
 pnpm validate:skills   # formato canônico da skill (bloqueante)
 pnpm scan:skills       # varredura heurística de segurança (bloqueante)
 pnpm compile:catalog   # gera packages/skills-catalog/dist/skills-registry.json (gitignorado)
+pnpm catalog:html      # gera packages/skills-catalog/dist/index.html (gitignorado)
 pnpm mcp:catalog       # servidor MCP stdio do catálogo local (packages/mcp-server)
 
 # Um arquivo de teste / um caso
@@ -43,6 +44,8 @@ O fluxo é um pipeline de 3 estágios sobre a mesma árvore `packages/skills-cat
 1. **`tools/validate-skills.ts`** — gate estrutural do formato canônico (ADR `cognitive-base/decisions/dec-002-formato-canonico-skill.md`). Valida kebab-case em toda pasta/arquivo, frontmatter YAML completo e tipado (`name`, `description`, `metadata`, `compatibility`, `sandbox`), `name` do frontmatter == nome da pasta, presença literal de `"Use when"` e `"Do NOT use for"` na `description`, corpo ≤ 500 linhas e ausência de `README.md` na pasta da skill.
 2. **`packages/skills-catalog/src/scan-skills.ts`** — scanner heurístico de supply chain sobre `scripts/`: `rm -rf /`, `curl | bash`, nomes de segredos. Substituto mínimo do Snyk/LLM-guard previsto no blueprint; não detecta jailbreak semântico.
 3. **`packages/skills-catalog/src/compile-catalog.ts`** — calcula SHA-256 por arquivo e emite `dist/skills-registry.json` conforme `src/types.ts`.
+
+O gerador `packages/skills-catalog/src/generate-catalog-html.ts` é irmão do compile: emite `dist/index.html` (GitHub Pages + tool MCP `generate_catalog_html`), sem alterar o algoritmo de hash.
 
 `SkillFrontmatter` / `RegistrySkill` / `SkillsRegistry` em `packages/skills-catalog/src/types.ts` são o contrato compartilhado — validador, scanner e compilador parseiam o frontmatter independentemente, então mudar o schema exige tocar os três.
 
