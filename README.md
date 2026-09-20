@@ -22,7 +22,7 @@ O índice humano filtrável (categoria, nome e descrição) é a página públic
 
 https://luiscarloslopes.github.io/codesteer-agent-skills/
 
-A página é `packages/skills-catalog/dist/index.html` (gitignorado), emitida por `pnpm catalog:html` e publicada no GitHub Pages em push em `main`. Até habilitar **Settings → Pages → Source: GitHub Actions**, o URL pode responder 404.
+A página é `packages/skills-catalog/dist/index.html` (gitignorado), emitida por `pnpm catalog:html` e publicada no GitHub Pages (source: GitHub Actions) em push em `main`.
 
 Para gerar o HTML localmente:
 
