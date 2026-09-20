@@ -48,8 +48,17 @@ describe('generate-catalog-html', () => {
     expect(html).toContain('testing');
     expect(html).toContain('Use when verifying the catalog pipeline. Do NOT use for production agents.');
     expect(html).toContain('0.0.1');
-    expect(html).toContain('Rede: sim');
-    expect(html).toContain('Execução: sim');
+    expect(html).not.toContain('Rede:');
+    expect(html).not.toContain('Execução:');
+  });
+
+  it('não emite tags de sandbox mesmo quando rede ou execução são true', () => {
+    const { html } = generateCatalogHtml({
+      registry: registryOf([sampleSkill({ sandbox: { network: true, allow_exec: true } })]),
+    });
+
+    expect(html).not.toContain('Rede:');
+    expect(html).not.toContain('Execução:');
   });
 
   it('HTML contém controles de filtro por categoria, nome e descrição', () => {
@@ -172,5 +181,61 @@ describe('generate-catalog-html', () => {
     expect(ci).toContain('actions/deploy-pages@v4');
     expect(ci).toContain('environment:\n      name: github-pages');
     expect(ci).not.toContain('required_reviewers');
+  });
+
+  it('embute logo CodeSteer (data-URI ou img inline) e o texto CodeSteer no header', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    expect(html).toContain('alt="CodeSteer Logo"');
+    expect(html).toContain('src="data:image/png;base64,');
+    expect(html).toMatch(/<header class="site-header">[\s\S]*<span class="brand__name">CodeSteer<\/span>/);
+  });
+
+  it('embute pills de IDE com alt Cursor, Claude Code, GitHub Copilot, Antigravity, Kiro, OpenCode, Codex', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    for (const alt of [
+      'Cursor',
+      'Claude Code',
+      'GitHub Copilot',
+      'Antigravity',
+      'Kiro',
+      'OpenCode',
+      'Codex',
+    ]) {
+      expect(html).toContain(`alt="${alt}"`);
+    }
+  });
+
+  it('não referencia imagens ou fontes em https://codesteer.vercel.app nem /_next/', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    expect(html).not.toMatch(/src=["']https:\/\/codesteer\.vercel\.app/);
+    expect(html).not.toMatch(/url\(["']?https:\/\/codesteer\.vercel\.app/);
+    expect(html).not.toMatch(/@font-face[^}]*url\([^)]*https:\/\//);
+    expect(html).not.toContain('/_next/');
+  });
+
+  it('declara tokens --mind-bg, --mind-accent, --mind-primary no CSS', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    expect(html).toContain('--mind-bg:');
+    expect(html).toContain('--mind-accent:');
+    expect(html).toContain('--mind-primary:');
+  });
+
+  it('HTML de fixture pequena tem length <= 120 * 1024', () => {
+    const { html } = generateCatalogHtml({
+      registry: registryOf([sampleSkill(), sampleSkill({ name: 'beta-skill', category: 'product' })]),
+    });
+
+    expect(html.length).toBeLessThanOrEqual(120 * 1024);
+  });
+
+  it('define bloco prefers-color-scheme: light além do dark-first', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    expect(html).toContain('color-scheme: dark light');
+    expect(html).toContain('@media (prefers-color-scheme: light)');
   });
 });
