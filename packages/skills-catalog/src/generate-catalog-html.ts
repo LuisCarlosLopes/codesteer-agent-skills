@@ -446,9 +446,7 @@ const PAGE_STYLES = `:root {
   left: 0;
   right: 0;
   z-index: 50;
-  background-color: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
+  background-color: #ffffff;
   border-bottom: 1px solid #E2E8F0;
   box-shadow: 0 1px 8px rgba(0, 0, 0, 0.03);
 }
@@ -459,15 +457,6 @@ const PAGE_STYLES = `:root {
   letter-spacing: -0.01em;
   font-weight: 700;
   color: #0F172A;
-}
-@media (prefers-color-scheme: dark) {
-  .site-header {
-    background-color: rgba(26, 29, 36, 0.85);
-    border-bottom-color: #27272A;
-  }
-  .brand__name {
-    color: #F8FAFC;
-  }
 }`;
 
 const TAILWIND_CONFIG_SCRIPT = `tailwind.config={
