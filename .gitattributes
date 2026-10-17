@@ -1,0 +1,5 @@
+# Saída de `pnpm build:plugin` — colapsa o diff nos PRs; edite a skill canônica em packages/skills-catalog/skills/
+plugins/codesteer-skills/** linguist-generated=true
+.claude-plugin/marketplace.json linguist-generated=true
+.agents/plugins/marketplace.json linguist-generated=true
+.cursor-plugin/marketplace.json linguist-generated=true

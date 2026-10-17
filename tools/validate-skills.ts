@@ -10,6 +10,8 @@ import type { SkillFrontmatter } from '../packages/skills-catalog/src/types.ts';
 
 const KEBAB_CASE = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const MAX_BODY_LINES = 500;
+// Limite do spec agentskills.io; clientes estritos (VS Code/Copilot) descartam a skill em silêncio acima disso
+const MAX_DESCRIPTION_CHARS = 1024;
 const FRONTMATTER = /^---\r?\n([\s\S]*?)\r?\n---\r?\n?([\s\S]*)$/;
 
 export interface SkillLocation {
@@ -159,9 +161,18 @@ function fileStem(relativePath: string): string {
 export function validateSkillsRoot(skillsRoot: string): ValidationResult {
   const violations: string[] = [];
   const skills = findSkillDirectories(skillsRoot);
+  const categoriesByName = new Map<string, string>();
 
   for (const skill of skills) {
     const label = `${skill.category}/${skill.name}`;
+
+    // O plugin achata skills/<categoria>/<nome> em skills/<nome> — nome repetido colidiria
+    const previousCategory = categoriesByName.get(skill.name);
+    if (previousCategory !== undefined) {
+      violations.push(`${label}: nome de skill duplicado (já existe em ${previousCategory}/${skill.name})`);
+    } else {
+      categoriesByName.set(skill.name, skill.category);
+    }
 
     if (!isKebabCase(skill.category)) {
       violations.push(`${label}: categoria deve ser kebab-case`);
@@ -208,6 +219,10 @@ export function validateSkillsRoot(skillsRoot: string): ValidationResult {
     }
     if (!fm.description.includes('Do NOT use for')) {
       violations.push(`${label}: description deve conter "Do NOT use for"`);
+    }
+    const descriptionLength = fm.description.trim().length;
+    if (descriptionLength > MAX_DESCRIPTION_CHARS) {
+      violations.push(`${label}: description excede ${MAX_DESCRIPTION_CHARS} caracteres (${descriptionLength})`);
     }
 
     const bodyLines = parsed.body.length === 0 ? 0 : parsed.body.split(/\r?\n/).length;

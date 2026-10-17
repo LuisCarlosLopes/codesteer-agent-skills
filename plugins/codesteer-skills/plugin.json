@@ -1,0 +1,5 @@
+{
+  "$schema": "https://agent-plugins.org/schemas/1.0.0/plugin.schema.json",
+  "name": "codesteer-skills",
+  "description": "Catálogo codesteer de skills para agentes de IA: arquitetura, automação, criativo, frontend, marketing, produto, engenharia de prompt, segurança e testes."
+}

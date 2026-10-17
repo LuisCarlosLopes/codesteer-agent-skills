@@ -266,6 +266,58 @@ describe('generate-catalog-html', () => {
     expect(html).toContain('text-badge-marketing-text');
     expect(html).toContain('Direct Response & Conversion');
   });
+
+  it('aplica o design system The Cognitive Control Room (DESING.md): paleta, fontes e paper panel', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    // Paleta oficial de DESING.md
+    expect(html).toContain('--mind-bg: #171918');
+    expect(html).toContain('--mind-surface: #202321');
+    expect(html).toContain('--mind-border: #3b403b');
+    expect(html).toContain('--mind-text: #eeeae0');
+    expect(html).toContain('--mind-text-secondary: #b5b9ad');
+    expect(html).toContain('--mind-paper: #eee9dc');
+    expect(html).toContain('--mind-ink: #232b28');
+    expect(html).toContain('--mind-accent: #ff975f');
+    expect(html).toContain('--mind-indigo: #b2b9ff');
+    expect(html).toContain('--mind-green: #b8ce9c');
+
+    // Tipografia oficial (Sora, DM Sans, JetBrains Mono)
+    expect(html).toContain('Sora');
+    expect(html).toContain('DM Sans');
+    expect(html).toContain('JetBrains Mono');
+
+    // Paper panel (#eee9dc com ink #232b28)
+    expect(html).toContain('paper-panel');
+
+    // Painel de filtro em fluxo normal do documento (sem sticky sobrepondo os cards no scroll)
+    expect(html).not.toContain('sticky top-');
+  });
+
+  it('exibe a tradução PT-BR da descrição no card do site e mantém busca bilíngue PT/EN', () => {
+    const grill = sampleSkill({
+      name: 'grill-me',
+      category: 'product',
+      description: 'Adversarial interrogation of a plan. Use when grilling. Do NOT use for coding.',
+    });
+
+    const { html } = generateCatalogHtml({ registry: registryOf([grill]) });
+
+    // Texto visível no card em PT-BR
+    expect(html).toContain('Interrogatório adversarial de um plano');
+    expect(html).toContain('Não usar para: implementar, depurar ou revisar código já escrito');
+
+    // Filtro por termo em PT-BR e por termo em EN
+    const byPtBr = generateCatalogHtml({
+      registry: registryOf([grill]),
+      filters: { description: 'interrogatório adversarial' },
+    });
+    const byEn = generateCatalogHtml({
+      registry: registryOf([grill]),
+      filters: { description: 'grilling' },
+    });
+
+    expect(byPtBr.skillCount).toBe(1);
+    expect(byEn.skillCount).toBe(1);
+  });
 });
-
-

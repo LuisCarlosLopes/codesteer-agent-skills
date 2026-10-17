@@ -14,7 +14,7 @@ export interface IdeLogo {
   src: string;
 }
 
-const OPENCODE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#00b9b9" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>`;
+const OPENCODE_SVG = `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#b2b9ff" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" role="img"><path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/></svg>`;
 
 const IDE_FILES: Array<{ alt: string; label: string; file: string }> = [
   { alt: 'Cursor', label: 'Cursor', file: 'cursor.svg' },
