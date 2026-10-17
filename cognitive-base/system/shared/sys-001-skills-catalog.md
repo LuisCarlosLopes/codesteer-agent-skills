@@ -4,7 +4,7 @@ type: service
 title: skills-catalog — autoria e compilação do registro
 status: draft
 created: "2026-09-14"
-updated: "2026-09-20"
+updated: "2026-10-17"
 author: "@luiscarloslopesjr"
 links:
   - id: gd-001
@@ -35,7 +35,7 @@ Pacote `packages/skills-catalog`: fonte editável das [[meta/glossary#skill|skil
 - `src/compile-catalog.ts` gera `skills-registry.json` (cadastro + [[meta/glossary#content-hash|content hashes]]) e `embeddings.json` ([[meta/glossary#embeddings|embeddings]] da `description`).
 - Nesta fatia, `src/generate-catalog-html.ts` (irmão do compile, [[dec-006-catalogo-html-estatico-github-pages]]) emite `dist/index.html` auto-contido a partir do mesmo registry — GitHub Pages e a tool MCP `generate_catalog_html`. Não altera o algoritmo de hash.
 - `src/scan-skills.ts` alimenta o scanner de segurança da CI ([[dec-005-integridade-supply-chain]]).
-- Categorias previstas: `(architecture)`, `(security)`, `(testing)`, `(product)` — PO, planning, grill-me, PRD.
+- Categorias previstas: `(architecture)`, `(automation)`, `(creative)`, `(frontend)`, `(marketing)`, `(product)`, `(prompt-engineering)`, `(security)`, `(testing)`. Nomes de skill não levam prefixo da marca (`codesteer-`) — a marca é o catálogo, não a skill.
 
 Não entrega skill ao agente — isso é CLI/MCP. Não é a UI humana de longo prazo — isso é [[sys-005-portal-web]]. A página HTML no GitHub Pages é recorte estático desta fatia, não o portal.
 
@@ -65,6 +65,9 @@ Engenharia de Arquitetura de Software · `@luiscarloslopesjr`
 
 | Versão | Data       | Autor                | Descrição |
 | ------ | ---------- | -------------------- | --------- |
+| 1.5.0  | 2026-10-17 | @luiscarloslopesjr   | Categorias `prompt-engineering`, `frontend` e `automation`; skills realocadas e prefixo `codesteer-` removido dos nomes |
+| 1.4.0  | 2026-10-17 | @luiscarloslopesjr   | Categoria `marketing` (growth, copywriting, SEO e campanhas) |
+| 1.3.0  | 2026-10-17 | @luiscarloslopesjr   | Categoria `creative` (fotografia e imagens realistas) |
 | 1.2.0  | 2026-09-20 | @luiscarloslopesjr   | Gerador HTML estático em `dist/index.html` ([[dec-006-catalogo-html-estatico-github-pages]]) |
 | 1.1.0  | 2026-09-14 | @luiscarloslopesjr   | Categoria `product` (PO, planning, grill-me, PRD) |
 | 1.0.0  | 2026-09-14 | @luiscarloslopesjr   | Overview alvo extraído do blueprint ASP |

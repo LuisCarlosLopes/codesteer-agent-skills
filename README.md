@@ -12,7 +12,7 @@ packages/skills-catalog/skills/<categoria>/<nome-kebab>/
 └── scripts/          # executáveis (passam pelo scanner de supply chain)
 ```
 
-Categorias: `architecture` · `security` · `testing` · `product`.
+Categorias: `architecture` · `automation` · `creative` · `frontend` · `marketing` · `product` · `prompt-engineering` · `security` · `testing`.
 
 ---
 
@@ -109,11 +109,11 @@ No seu projeto de destino:
 ```bash
 # Método 1: Symlink (recomendado — reflete git pull do catálogo)
 mkdir -p .cursor/skills
-ln -s "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/codesteer-grill-me" .cursor/skills/codesteer-grill-me
+ln -s "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/grill-me" .cursor/skills/grill-me
 
 # Método 2: Cópia direta (isolamento total)
 mkdir -p .cursor/skills
-cp -R "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/codesteer-grill-me" .cursor/skills/codesteer-grill-me
+cp -R "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/grill-me" .cursor/skills/grill-me
 ```
 
 O agente lerá o `SKILL.md` automaticamente e ativará as instruções com base no gatilho `"Use when"` definido no frontmatter, consultando as pastas `references/` e `templates/` sob demanda.

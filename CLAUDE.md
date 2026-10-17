@@ -37,7 +37,7 @@ Env do MCP: `ASP_CATALOG_ROOT` (raiz do pacote catálogo, a pasta que contém `s
 
 O produto é uma **plataforma de catálogo de skills para agentes de IA**. O blueprint completo está em `arquitetura_plataforma_skills_mcp.md`; esta fatia implementa autoria + gates + compilação de registry + MCP stdio local (`packages/mcp-server`). Não há API de upload, publicação NPM, `libs/core`, CLI, registry HTTP nem embeddings — "subir uma skill" continua sendo abrir um PR que adiciona a pasta canônica; consumir o catálogo no agente é `pnpm mcp:catalog`.
 
-Categorias previstas para as skills: `architecture`, `security`, `testing`, `product` (PO, planning, grill-me, PRD). O validador não impõe essa lista — ela é convenção do README e de `cognitive-base/system/shared/sys-001-skills-catalog.md`.
+Categorias previstas para as skills: `architecture` (decisão técnica, frameworks de agentes), `automation` (automação de apps e browsers), `creative` (fotografia, geração de imagens realistas, mídia visual), `frontend` (UI, HTML/CSS a partir de mocks), `marketing` (copywriting, SEO, inbound, growth, campanhas), `product` (PO, planning, grill-me, PRD), `prompt-engineering` (avaliar, densificar, projetar prompts e personas), `security`, `testing`. Nomes de skill não levam prefixo `codesteer-`. O validador não impõe essa lista — ela é convenção do README e de `cognitive-base/system/shared/sys-001-skills-catalog.md`.
 
 O fluxo é um pipeline de 3 estágios sobre a mesma árvore `packages/skills-catalog/skills/<categoria>/<nome-kebab>/`:
 
