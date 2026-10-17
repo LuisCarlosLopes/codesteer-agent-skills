@@ -109,8 +109,6 @@ components:
 
 ## Overview
 
-Extração documental realizada em 17/10/2026 a partir do repositório local
-`/Users/luiscarloslopesjr/GitHub/codesteer-squad-ai-landing-page`.
 Site de referência: [CodeSteer](https://codesteer.vercel.app).
 Fontes: `DESIGN.md` existente e `src/app/globals.css` do repositório do site.
 A página publicada não pôde ser consultada; esta extração não atesta paridade

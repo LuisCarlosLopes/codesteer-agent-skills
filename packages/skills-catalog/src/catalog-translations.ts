@@ -146,6 +146,12 @@ export const SKILL_TRANSLATIONS_PT_BR: Record<string, SkillTranslationPtBr> = {
     doNotUse:
       'Não usar para: fotos de produtos, paisagens ou arquitetura sem sujeito humano, personagens cartoon/anime/3D ou definições de persona apenas em texto.',
   },
+  'web-security-audit': {
+    summary:
+      'Auditoria de segurança autorizada e não destrutiva de aplicações web com playwright-cli: cabeçalhos HTTP, cookies e Web Storage, segredos expostos no front-end, CORS, controle de acesso e vazamentos de source maps, mapeados no OWASP Top 10:2025. Confirma escopo e autorização antes de começar e, se o site exigir login, pede que o usuário autentique no navegador. Quando usar: para auditar a segurança de um site ou app próprio, revisar headers ou validar a prontidão antes do lançamento.',
+    doNotUse:
+      'Não usar para: alvos sem autorização, ataques destrutivos, negação de serviço, força bruta de credenciais ou revisões de conformidade LGPD (use lgpd-implementation).',
+  },
 };
 
 export function getSkillTranslationPtBr(skillName: string): SkillTranslationPtBr | undefined {
