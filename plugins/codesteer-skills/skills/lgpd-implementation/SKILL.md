@@ -1,10 +1,10 @@
 ---
 name: lgpd-implementation
-description: Implement, review or audit LGPD compliance across digital products, data flows and software operations. Use when the user mentions LGPD, privacidade, dados pessoais, consentimento, base legal, direitos do titular, cookies, retenção, exclusão, ANPD, RIPD, incidente de dados, transferência internacional, decisão automatizada, encarregado/DPO, art. 20, art. 23, art. 37, art. 38, or wants the vulnerable points, missing controls and unimplemented parts exposed in frontend, backend, database, integrations and operational processes. Do NOT use for formal legal opinions, for GDPR-only scope, or for security reviews unrelated to personal data.
+description: "Implement, review or audit LGPD (Lei 13.709/2018) compliance in digital products, data flows and operations: data inventory, legal basis per flow, consent and preference center, data subject rights (access, export, deletion), retention, PII in logs, third parties and international transfers, incident response, automated decisions (art. 20), public sector (arts. 23-30), RIPD (art. 38) and DPO/encarregado (art. 41). Use when the user mentions LGPD, privacidade, dados pessoais, dados sensíveis, consentimento, base legal, direitos do titular, cookies, retenção, exclusão de conta, ANPD, RIPD, incidente de dados, transferência internacional, decisão automatizada, encarregado/DPO, privacy by design, or wants the missing, partial or vulnerable privacy controls exposed in frontend, backend, database, integrations and processes, even without saying \"LGPD\". Do NOT use for formal legal opinions, GDPR-only scope, or security reviews unrelated to personal data (use web-security-audit)."
 license: Apache-2.0
 compatibility: "Minimum agent tier: 1. Requires terminal: yes. Network access: no. Script execution: no."
 metadata:
-  version: 0.0.1
+  version: 0.1.0
   author: "@codesteer"
   category: security
   min-agent-tier: "1"
@@ -13,244 +13,223 @@ metadata:
   sandbox-allow-exec: "false"
 ---
 
-# Revisao e Implementacao de LGPD
+# Implementação e Auditoria de LGPD
 
-Use esta skill para transformar um pedido vago de "adequar a LGPD" em
-diagnostico com evidencia, plano de remediacao e, quando pedido, mudancas
-concretas no produto ou nos artefatos do projeto.
+Transforme um pedido vago de "adequar à LGPD" em diagnóstico com evidência,
+plano de remediação priorizado por risco e, quando pedido, mudanças concretas
+no código, no schema e nos processos do projeto.
 
-## Objetivo
+## Princípios que guiam o trabalho
 
-Produzir uma avaliacao tecnica de aderencia a LGPD que:
-
-- diferencie o que esta implementado, parcial, ausente ou vulneravel
-- amarre cada conclusao a evidencias reais do repositorio ou dos documentos
-- priorize risco para titulares, negocio e operacao
-- cubra tanto os controles tecnicos quanto os requisitos normativos visiveis
-- proponha a menor mudanca efetiva para fechar cada lacuna
-
-## Use quando
-
-- o usuario pedir implementacao de LGPD, privacy by design ou privacy by default
-- o usuario quiser revisar se um projeto esta aderente a LGPD
-- houver pedido para encontrar lacunas, riscos, vulnerabilidades ou itens nao implementados
-- o escopo envolver consentimento, cookies, analytics, perfis de usuario, exportacao/exclusao de dados, logs, terceiros, retencao, base legal, RIPD ou resposta a incidentes
-- o usuario quiser cobertura mais exaustiva por artigo, capitulo ou obrigacao da lei
-- houver tratamento por ente publico ou uso de decisao automatizada/perfilizacao
-
-## Nao use para
-
-- afirmar conformidade juridica final sem evidencia tecnica suficiente
-- substituir parecer juridico, DPO ou avaliacao regulatoria formal
-- tratar "tem politica de privacidade" como prova de adequacao real
+- **Evidência antes de conclusão.** Política de privacidade publicada não é
+  controle implementado. Só marque algo como `Implementado` depois de ver o
+  código, a migration, a configuração, o job ou o contrato que o sustenta.
+- **LGPD não é cookie banner.** O art. 7 traz dez bases legais e o
+  consentimento é apenas uma delas. Reduzir a análise a consentimento gera
+  falsa segurança e esconde lacunas em retenção, direitos, terceiros e logs.
+- **Separe três camadas em toda recomendação:** o que a lei exige
+  expressamente, o que é recomendação conservadora de engenharia e o que
+  depende de decisão do jurídico ou do encarregado. Misturá-las faz o time
+  tratar opinião como obrigação ou obrigação como opcional.
+- **Proporcionalidade.** Um pedido estreito ("ajuste o banner de cookies")
+  recebe resposta estreita, com os riscos adjacentes apenas sinalizados. Um
+  pedido de auditoria recebe o diagnóstico completo.
 
 ## Modos de trabalho
 
-### 1. Modo Auditoria
+| Modo | Quando o usuário quer | Entregue | Leia |
+| --- | --- | --- | --- |
+| **Auditoria** | validar o estado atual, achar o que falta ou está vulnerável | achados com evidência, status, severidade e remediação por domínio | `references/lgpd-control-framework.md` |
+| **Implementação** | sair do diagnóstico para mudança concreta | sequência por risco e dependência, mudanças em código/schema/telas/processos, critério de validação por item | framework + domínio afetado na matriz |
+| **Cobertura normativa** | saber se cobre "todos os itens", revisão por artigo, readiness de auditoria | mapa por capítulo e artigo com aplicável / não aplicável / pendente | `references/lgpd-coverage-matrix.md` + `references/lgpd-regulatory-checkpoints.md` |
 
-Use quando o usuario quer validar o estado atual, apontar vulnerabilidades ou
-descobrir o que falta.
-
-Entregue:
-
-- achados priorizados
-- evidencias concretas
-- classificacao por severidade e status
-- plano de remediacao por dominio
-
-### 2. Modo Implementacao
-
-Use quando o usuario quer sair do diagnostico para uma mudanca concreta.
-
-Entregue:
-
-- sequencia de implementacao por risco e dependencia
-- mudancas em codigo, schema, endpoints, telas ou artefatos operacionais
-- criterios objetivos para validar que a lacuna foi fechada
-
-### 3. Modo Cobertura Normativa
-
-Use quando o usuario quer saber se o projeto cobre "todos os itens" da LGPD,
-ou quando o pedido exigir uma leitura mais sistematica da lei e das normas
-complementares.
-
-Entregue:
-
-- mapa de cobertura por bloco normativo
-- itens aplicaveis, nao aplicaveis e pendentes
-- lacunas juridico-operacionais que nao aparecem so olhando o codigo
+Diagnóstico seguido de implementação é a combinação mais comum: audite
+primeiro, implemente a partir dos achados críticos.
 
 ## Protocolo
 
-1. Delimite o escopo real.
-   Identifique produto, tipos de dados, perfis de titular, dados sensiveis,
-   criancas/adolescentes, terceiros, jurisdicoes, canal de coleta e partes do
-   sistema no escopo.
-2. Determine o regime de aplicacao.
-   Verifique se ha tratamento no setor privado, poder publico, relacao de
-   consumo, internet, saude, educacao, credito ou outro contexto regulado.
-   Verifique tambem se existem excecoes, limitacoes de aplicabilidade ou
-   obrigacoes setoriais correlatas.
-3. Inspecione a realidade antes de concluir.
-   Leia codigo, migrations, schemas, APIs, jobs, dashboards, templates de e-mail,
-   configuracoes de analytics, telas de cadastro, logs, contratos e politicas.
-   Nao declare nada como implementado sem evidencia.
-4. Classifique o pedido.
-   Escolha entre auditoria, implementacao, cobertura normativa ou diagnostico seguido de
-   implementacao.
-5. Aplique o framework de controles.
-   Leia `references/lgpd-control-framework.md` e passe por cada dominio
-   relevante sem assumir que um unico controle resolve todos os outros.
-6. Aplique a matriz normativa.
-   Leia `references/lgpd-coverage-matrix.md` para nao deixar de fora temas como
-   escopo de aplicacao, poder publico, decisao automatizada, registro de
-   operacoes, sancoes e regulamentos complementares.
-7. Monte a matriz de evidencias.
-   Para cada dominio, marque:
-   - `Implementado`
-   - `Parcial`
-   - `Ausente`
-   - `Vulneravel`
-   - `Nao aplicavel` com justificativa
-8. Priorize por risco.
-   Eleve para topo o que:
-   - expoe dados pessoais sem base clara
-   - coleta alem do necessario
-   - impede exercicio de direitos do titular
-   - vaza PII em logs, integracoes ou analytics
-   - nao possui controle de retencao, exclusao ou revogacao
-   - trata dados sensiveis ou de menores sem trilha reforcada
-   - automatiza decisao relevante sem transparencia ou revisao humana
-   - opera no poder publico sem os artefatos e fundamentos especificos
-   - sofre risco sancionatorio relevante por ausencia de governanca minima
-9. Feche com remediacao acionavel.
-   Cada gap precisa sair com proxima acao, dono provavel, impacto e evidencia
-   minima para considerar o item resolvido.
+1. **Delimite o escopo real.** Produto, tipos de dado, perfis de titular,
+   dados sensíveis, crianças e adolescentes, terceiros, regiões de
+   processamento, canais de coleta e quais partes do sistema estão no escopo.
+2. **Determine o regime de aplicação.** Confira a aplicação territorial
+   (art. 3) e as exceções (art. 4). Identifique se há poder público
+   (arts. 23-30), relação de consumo (CDC), provedor de aplicação (Marco
+   Civil), setor regulado (saúde, financeiro, educação, telecom) e se o agente
+   se enquadra como pequeno porte (Resolução CD/ANPD nº 2/2022), o que altera
+   obrigações de encarregado, registro e prazos.
+3. **Colete evidência antes de opinar.** Use a tabela "Onde procurar" abaixo.
+   Leia schema, migrations, DTOs, rotas, jobs, configuração de analytics,
+   templates de e-mail, logs, infraestrutura e documentos. Registre o caminho
+   do arquivo ou o artefato que sustenta cada conclusão.
+4. **Percorra os 12 domínios.** Siga `references/lgpd-control-framework.md`
+   sem assumir que um controle resolve outro. Um preference center não
+   implementa retenção; um endpoint de exclusão não prova que backups e
+   terceiros foram tratados.
+5. **No modo cobertura, aplique a matriz por artigo.** Ela existe para
+   expor obrigações que não aparecem olhando só o código: registro de
+   operações, RIPD, encarregado, transferência internacional, poder público e
+   sanções.
+6. **Classifique cada item.** Status: `Implementado`, `Parcial`, `Ausente`,
+   `Vulnerável` (existe, mas introduz risco ou falsa segurança) ou
+   `Não aplicável` com justificativa por fato observável. Severidade:
+   `Crítica`, `Alta`, `Média`, `Baixa` conforme a escala do framework.
+7. **Priorize por risco ao titular.** Vai para o topo o que:
+   - expõe dado pessoal sem base legal clara ou coleta além do necessário
+   - impede o exercício de direitos (acesso, exclusão, revogação, revisão)
+   - vaza PII em logs, observabilidade, filas, analytics ou terceiros
+   - não tem retenção, descarte ou revogação funcionando de ponta a ponta
+   - trata dado sensível ou de menor sem trilha reforçada
+   - automatiza decisão com efeito relevante sem transparência nem revisão
+   - opera no poder público sem fundamentos e artefatos próprios
+   - deixa o controlador sem capacidade de demonstrar accountability
+8. **Feche com remediação acionável.** Cada lacuna sai com próxima ação,
+   dono provável, artigo ou risco associado e a evidência mínima que
+   permitirá marcá-la como resolvida.
 
-## Dominios obrigatorios de verificacao
+## Os 12 domínios de verificação
 
-Considere estes dominios, salvo justificativa objetiva para exclusao:
+Taxonomia única usada pela skill, pelo framework e pela matriz. Não substitua
+por checklist próprio: a numeração é o que permite cruzar achados, artigos e
+remediação.
 
-1. Escopo de aplicacao, excecoes e contexto regulatorio
-2. Inventario de dados e mapa de tratamento
-3. Finalidade, necessidade, transparencia e base legal por fluxo
-4. Consentimento, preferencia e revogacao
-5. Direitos do titular: confirmacao, acesso, correcao, portabilidade, exclusao, oposicao e revisao
-6. Decisao automatizada, perfilizacao e explicabilidade operacional
-7. Retencao, descarte, anonimizacao e backups
-8. Seguranca, acesso minimo, segregacao e logs
-9. Dados sensiveis, biometria, saude, criancas e adolescentes
-10. Controlador, operador, suboperador, encarregado e governanca
-11. Registro de operacoes, RIPD, politicas, treinamento e evidencias
-12. Terceiros, operadores, subprocessadores e transferencias internacionais
-13. Incidentes, notificacao, auditoria e rastreabilidade
-14. Poder publico, quando aplicavel
-15. Exposicao sancionatoria e fragilidade regulatoria
+| # | Domínio | Âncora na Lei 13.709/2018 |
+| --- | --- | --- |
+| 1 | Escopo, regime de aplicação e contexto regulatório | arts. 1-4 |
+| 2 | Inventário de dados e mapa de tratamento | art. 37 |
+| 3 | Finalidade, necessidade, transparência e base legal por fluxo | arts. 6, 7, 9, 10 |
+| 4 | Consentimento, preferências e revogação | arts. 8, 9 §§2-3, 18 IX |
+| 5 | Direitos do titular e capacidade real de atendê-los | arts. 17-19, 21-22 |
+| 6 | Decisão automatizada, perfilização e revisão | art. 20, art. 12 §2 |
+| 7 | Retenção, término do tratamento, descarte e backups | arts. 15-16 |
+| 8 | Segurança, acesso mínimo, segregação e logs | arts. 46-47, 49 |
+| 9 | Dados sensíveis, biometria, saúde, crianças e adolescentes | arts. 11-14 |
+| 10 | Agentes de tratamento, encarregado, RIPD e governança | arts. 37-41, 50 |
+| 11 | Terceiros, operadores e transferência internacional | arts. 26, 33-36, 39, 42 |
+| 12 | Incidentes, responsabilidade, rastreabilidade e sanções | arts. 42-45, 48, 52 |
 
-## Cobertura normativa minima
+**Bloco adicional: poder público (arts. 23-30).** Quando houver órgão ou
+entidade pública, política pública ou base de dados sob regime público, trate
+como bloco próprio. Finalidade pública, competência legal, compartilhamento
+entre órgãos (art. 26) e vedação de transferência a privados (art. 26 §1)
+não cabem no checklist de SaaS.
 
-Mesmo quando o usuario pedir algo estreito como "ajuste o banner de cookies",
-nao perca de vista estes blocos:
+## Onde procurar evidência no repositório
 
-1. Fundamentos, principios e definicoes operacionais da LGPD
-2. Hipoteses de aplicacao e possiveis excecoes do tratamento
-3. Regras para tratamento de dados pessoais e dados sensiveis
-4. Requisitos especificos para criancas e adolescentes
-5. Direitos dos titulares e capacidade real de atende-los
-6. Controlador, operador, encarregado e cadeia de responsabilidades
-7. Registro das operacoes e RIPD
-8. Seguranca e incidente de dados pessoais
-9. Transferencia internacional
-10. Poder publico, se o caso envolver ente publico ou dados sob esse regime
-11. Decisoes automatizadas e possibilidade de revisao
-12. Programa de governanca e exposicao a sancoes
+| Sinal | Onde buscar | Padrões úteis |
+| --- | --- | --- |
+| Campos pessoais e sensíveis | migrations, schema, DTOs, forms, validators | `cpf`, `cnpj`, `rg`, `phone`, `telefone`, `birth`, `nascimento`, `address`, `cep`, `lat`, `geo`, `health`, `saude`, `biometr`, `race`, `religi` |
+| Rastreadores e pixels | layout raiz, `_app`, `index.html`, tag manager, SDKs mobile | `gtag`, `fbq`, `dataLayer`, `hotjar`, `clarity`, `segment`, `mixpanel`, `amplitude`, `posthog` |
+| PII em logs e observabilidade | loggers, interceptors, middlewares, Sentry/Datadog config | `logger.*(user`, `req.body`, `console.log(.*email`, `sendDefaultPii`, `beforeSend` |
+| Consentimento e preferências | tabelas de consent, banner, settings do usuário | `consent`, `preferences`, `opt_in`, `marketing`, `accepted_terms`, `terms_version` |
+| Direitos do titular | rotas e jobs de exportação/exclusão, painel admin, playbooks | `export`, `download`, `delete`, `erase`, `anonymi`, `privacy`, `lgpd`, `gdpr` |
+| Retenção e descarte | crons, jobs, TTLs, políticas de bucket, soft delete | `retention`, `ttl`, `purge`, `cleanup`, `deleted_at`, `soft_delete`, `lifecycle` |
+| Terceiros e regiões | `package.json`, `.env.example`, terraform, docker-compose, contratos | nomes de SDKs, `region`, `us-east`, `eu-`, DPAs e anexos de segurança |
+| Decisão automatizada | serviços de score, antifraude, ranking, recomendação, bloqueio | `score`, `risk`, `fraud`, `block`, `ban`, `rank`, `recommend`, `ml`, `model` |
+| Acesso e auditoria | RBAC, middlewares de autorização, audit log | `role`, `permission`, `is_admin`, `audit`, `impersonat` |
 
-## Heuristicas de deteccao
+Quando o repositório não estiver acessível, peça os artefatos equivalentes e
+registre a limitação em "Evidências ausentes".
 
-Procure sinais que costumam indicar falso senso de conformidade:
+## Heurísticas de falso senso de conformidade
 
-- banner de cookies sem botao claro de recusa
-- consentimento misturado com termos contratuais obrigatorios
-- analytics, pixels ou CRM ativos antes da escolha do usuario
-- endpoint de exclusao que apenas desativa conta, sem politica de retencao
-- exportacao de dados inexistente ou manual demais para operar com prazo
-- PII em logs de aplicacao, observabilidade ou fila
-- coleta de CPF, telefone, data de nascimento ou geolocalizacao sem justificativa clara
-- ausencia de trilha de auditoria para consentimento e revogacao
-- dados sensiveis no mesmo fluxo de dados comuns sem tratamento reforcado
-- terceiros processando dados fora do Brasil sem mapeamento contratual
-- uso de legitimo interesse como rotulo generico sem teste documentado
-- perfilizacao ou score automatizado sem transparencia minima
-- fluxo de orgao publico avaliado como se fosse mero SaaS privado
-- ausencia de inventario de operadores, SCCs ou base de transferencia internacional
-- impossibilidade de provar quem decidiu, acessou, exportou ou excluiu dados
+Sinais que costumam indicar que a adequação é só aparente:
 
-## Quando implementar mudancas
+- banner de cookies sem recusa tão fácil quanto a aceitação, ou com
+  rastreadores disparando antes da escolha
+- consentimento misturado com aceite obrigatório de termos contratuais
+- caixas pré-marcadas ou finalidades opcionais (push, marketing,
+  personalização) ativadas por padrão
+- "excluir conta" que só desativa o registro, sem retenção definida, sem
+  propagação a terceiros e sem tratamento de backups
+- exportação de dados inexistente ou tão manual que não cumpre os 15 dias do
+  art. 19 II
+- PII em logs de aplicação, filas, dead-letter queues ou eventos de analytics
+- CPF, telefone, data de nascimento ou geolocalização obrigatórios sem
+  justificativa de necessidade
+- legítimo interesse usado como rótulo genérico sem teste documentado
+  (finalidade, necessidade, balanceamento, salvaguardas)
+- dado sensível tratado no mesmo fluxo, retenção e exposição dos dados comuns
+- score, bloqueio ou perfilização sem transparência sobre critérios e sem
+  canal de revisão
+- operadores processando fora do Brasil sem inventário nem mecanismo do
+  art. 33
+- ninguém consegue provar quem decidiu, acessou, exportou ou excluiu dados
+- órgão público avaliado como se fosse SaaS privado
 
-Ao editar o projeto:
+## Ao implementar mudanças
 
-1. Relacione cada mudanca a um risco ou requisito de privacidade.
-2. Prefira controles verificaveis:
-   - preference center
-   - trilha de consentimento
-   - exportacao de dados
-   - workflow de exclusao
-   - retencao automatizada
-   - mascaramento de logs
-   - segregacao de acesso
-3. Nao esconda lacunas processuais com patch de codigo.
-   Se faltar contrato com operador, RIPD, politica ou definicao de base legal,
-   diga explicitamente.
-4. Se o pedido exigir decisao juridica, separe:
-   - o que e requisito legal expresso
-   - o que e recomendacao conservadora de engenharia
-   - o que depende de validacao com juridico ou encarregado
-5. Se o sistema usar ML, score, antifraude, ranking, recomendacao ou bloqueio
-   automatico com efeito relevante para o titular, avalie explicitamente o
-   tema de decisao automatizada e revisao.
-6. Se o caso envolver ente publico, nao reutilize checklist simplificado do
-   setor privado; trate as regras especificas como bloco proprio.
+1. **Ordene pelo risco, não pela facilidade.** Primeiro o que sangra (PII em
+   logs, rastreadores antes de consentimento, sobrecoleta), depois direitos
+   do titular, depois retenção, depois governança e documentação.
+2. **Prefira controles verificáveis.** Preference center com trilha de
+   auditoria, exportação de dados por endpoint, workflow de exclusão com
+   propagação, retenção automatizada por job, mascaramento de logs,
+   segregação de acesso com audit log.
+3. **Vincule cada mudança a um domínio e a um artigo ou risco** e defina o
+   critério objetivo que prova que a lacuna fechou.
+4. **Não esconda lacuna processual com patch de código.** Se faltar contrato
+   com operador, RIPD, política de retenção aprovada ou definição de base
+   legal, diga explicitamente e aponte o dono.
+5. **Trate decisão automatizada com cuidado de redação.** O art. 20 garante o
+   direito de solicitar revisão e de obter informações sobre os critérios. A
+   exigência de revisão "por pessoa natural" foi vetada, então apresente
+   revisão humana como recomendação conservadora, não como exigência literal,
+   e exija transparência e canal de revisão em qualquer caso.
+6. **Em poder público, não reaproveite o checklist privado.** Use o bloco
+   dos arts. 23-30 e o guia da ANPD para o setor público.
 
-## Formato de saida
+## Formato de saída
 
-Use esta estrutura por padrao:
+Para auditoria e cobertura normativa:
 
 ```markdown
-# Diagnostico LGPD
+# Diagnóstico LGPD
 ## Escopo avaliado
 ## Resumo executivo
-## Achados prioritarios
-| Severidade | Status | Dominio | Evidencia | Risco | Proxima acao |
-## Mapa de cobertura normativa
-## Lacunas por dominio
-## Plano de remediacao
-## Evidencias ausentes ou limitacoes
-## Dependencias de juridico, DPO ou operacao
+## Achados prioritários
+| Severidade | Status | Domínio | Evidência | Risco | Próxima ação |
+## Lacunas por domínio
+## Mapa de cobertura normativa   <!-- só no modo cobertura ou quando pedido -->
+## Plano de remediação
+## Evidências ausentes ou limitações
+## Dependências de jurídico, encarregado ou operação
 ```
 
-Se o pedido for implementacao, adicione:
+Para implementação, acrescente:
 
 ```markdown
-## Mudancas propostas
-## Ordem de implementacao
-## Como validar a correcao
+## Mudanças propostas
+## Ordem de implementação
+## Como validar a correção
 ```
+
+Para pedido estreito (um controle específico), entregue a mudança pedida com
+evidência e critério de validação, seguida de uma seção curta "Riscos
+adjacentes observados" em vez do diagnóstico completo.
 
 ## Guardrails
 
-- Nao use linguagem de certificacao final como "100% aderente" ou "em conformidade" sem ressalvas.
-- Nao marque `Implementado` quando existir apenas intencao documental.
-- Nao misture ausencia de prova com prova de ausencia; explicite a limitacao.
-- Nao reduza LGPD a consentimento e cookie banner.
-- Nao deixe de apontar risco operacional so porque a mitigacao depende de processo e nao de codigo.
-- Nao omita arquivos, tabelas, endpoints, jobs, provedores ou telas relevantes quando eles estiverem acessiveis.
-- Nao trate checklist de produto privado como suficiente para poder publico.
-- Nao ignore art. 20 so porque nao existe modelo de IA no nome do projeto; score, recomendacao, bloqueio e perfilizacao tambem importam.
-- Nao declarar "nao aplicavel" sem justificar por fato observavel do caso.
+- Não use linguagem de certificação ("100% aderente", "em conformidade") sem
+  ressalvas: a skill produz evidência técnica, não parecer jurídico.
+- Não marque `Implementado` com base em intenção documental.
+- Não confunda ausência de prova com prova de ausência; declare a limitação.
+- Não declare `Não aplicável` sem fato observável que justifique.
+- Não omita arquivos, tabelas, endpoints, jobs, provedores ou telas
+  relevantes quando estiverem acessíveis.
+- Não ignore o art. 20 só porque o projeto não se chama "IA": score,
+  antifraude, ranking, recomendação e bloqueio automático contam.
+- Não deixe de apontar risco operacional só porque a mitigação depende de
+  processo e não de código.
 
-## Referencia
+## Referências
 
-Antes de fechar o diagnostico, consulte
-`references/lgpd-control-framework.md`,
-`references/lgpd-coverage-matrix.md` e
-`references/lgpd-regulatory-checkpoints.md`.
+- `references/lgpd-control-framework.md`: perguntas, onde procurar, sinais de
+  risco e evidência mínima por domínio. Leia em toda auditoria e
+  implementação.
+- `references/lgpd-coverage-matrix.md`: matriz por capítulo e artigo da lei.
+  Leia no modo cobertura normativa ou quando o usuário pedir revisão por
+  artigo.
+- `references/lgpd-regulatory-checkpoints.md`: resoluções e guias da ANPD,
+  prazos e normas correlatas. Leia quando o caso envolver incidente,
+  transferência internacional, encarregado, pequeno porte, legítimo interesse
+  ou setor regulado.

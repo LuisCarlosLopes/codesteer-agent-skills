@@ -30,6 +30,12 @@
       "prompt": "Temos um motor antifraude que bloqueia cadastro, reduz limite e manda casos para revisao automatica usando score interno e sinais de dispositivo. Avalie os riscos de LGPD, especialmente decisao automatizada, perfilizacao, transparencia, logs e possibilidade de revisao humana.",
       "expected_output": "A skill identifica o tema de decisao automatizada e perfilizacao como eixo central do diagnostico, conecta isso a transparencia e revisao, e nao limita a analise a consentimento e seguranca.",
       "files": []
+    },
+    {
+      "id": 6,
+      "prompt": "Só preciso ajustar o banner de cookies do nosso site em Next.js: hoje ele tem um botão 'Aceitar' e o GA4 e o pixel do Meta carregam no layout raiz. Faz o mínimo pra ficar certo sob LGPD sem me entregar uma auditoria inteira.",
+      "expected_output": "A skill responde proporcionalmente ao pedido estreito: propõe consentimento granular com recusa fácil, bloqueio dos rastreadores até a escolha e registro da escolha, com critério de validação, e sinaliza riscos adjacentes em uma seção curta em vez de produzir o diagnóstico completo.",
+      "files": []
     }
   ]
 }
