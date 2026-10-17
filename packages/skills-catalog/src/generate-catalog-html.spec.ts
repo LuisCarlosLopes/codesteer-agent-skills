@@ -101,7 +101,7 @@ describe('generate-catalog-html', () => {
 
   it('filtros name e description são substring case-insensitive', () => {
     const grill = sampleSkill({
-      name: 'codesteer-grill-me',
+      name: 'grill-me',
       description: 'Use when grilling a plan. Do NOT use for production agents.',
       category: 'product',
     });
@@ -125,7 +125,7 @@ describe('generate-catalog-html', () => {
     });
 
     expect(byName.skillCount).toBe(1);
-    expect(byName.html).toContain('codesteer-grill-me');
+    expect(byName.html).toContain('grill-me');
     expect(byName.html).not.toContain('pipeline-canary');
     expect(byDescription.skillCount).toBe(1);
     expect(byDescription.html).toContain('pipeline-canary');
@@ -238,4 +238,34 @@ describe('generate-catalog-html', () => {
     expect(html).toContain('color-scheme: dark light');
     expect(html).toContain('@media (prefers-color-scheme: light)');
   });
+
+  it('renderiza skill da categoria creative com badge e tag correspondente', () => {
+    const creativeSkill = sampleSkill({
+      name: 'photorealistic-image-generation',
+      category: 'creative',
+      description: 'Use when generating photos. Do NOT use for UI wireframes.',
+    });
+    const { html } = generateCatalogHtml({ registry: registryOf([creativeSkill]) });
+
+    expect(html).toContain('photorealistic-image-generation');
+    expect(html).toContain('bg-badge-creative-bg');
+    expect(html).toContain('text-badge-creative-text');
+    expect(html).toContain('Photorealism & Optics');
+  });
+
+  it('renderiza skill da categoria marketing com badge e tag correspondente', () => {
+    const marketingSkill = sampleSkill({
+      name: 'copywriting-persuasivo',
+      category: 'marketing',
+      description: 'Use when writing persuasive copy. Do NOT use for technical docs.',
+    });
+    const { html } = generateCatalogHtml({ registry: registryOf([marketingSkill]) });
+
+    expect(html).toContain('copywriting-persuasivo');
+    expect(html).toContain('bg-badge-marketing-bg');
+    expect(html).toContain('text-badge-marketing-text');
+    expect(html).toContain('Direct Response & Conversion');
+  });
 });
+
+

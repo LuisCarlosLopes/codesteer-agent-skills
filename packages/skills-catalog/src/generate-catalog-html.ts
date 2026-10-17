@@ -82,19 +82,32 @@ function uniqueCategories(skills: RegistrySkill[]): string[] {
 
 const CATEGORY_STYLES: Record<string, { bg: string; text: string; border: string }> = {
   architecture: { bg: 'bg-badge-arch-bg', text: 'text-badge-arch-text', border: 'border-badge-arch-text/20' },
+  automation: { bg: 'bg-badge-automation-bg', text: 'text-badge-automation-text', border: 'border-badge-automation-text/20' },
+  creative: { bg: 'bg-badge-creative-bg', text: 'text-badge-creative-text', border: 'border-badge-creative-text/20' },
+  frontend: { bg: 'bg-badge-frontend-bg', text: 'text-badge-frontend-text', border: 'border-badge-frontend-text/20' },
+  marketing: { bg: 'bg-badge-marketing-bg', text: 'text-badge-marketing-text', border: 'border-badge-marketing-text/20' },
   product: { bg: 'bg-badge-product-bg', text: 'text-badge-product-text', border: 'border-badge-product-text/20' },
+  'prompt-engineering': { bg: 'bg-badge-prompt-bg', text: 'text-badge-prompt-text', border: 'border-badge-prompt-text/20' },
   security: { bg: 'bg-badge-security-bg', text: 'text-badge-security-text', border: 'border-badge-security-text/20' },
   testing: { bg: 'bg-badge-testing-bg', text: 'text-badge-testing-text', border: 'border-badge-testing-text/20' },
 };
 
 const SKILL_THEME_TAGS: Record<string, string> = {
-  'codesteer-advanced-elicitation': 'Prompt elicitation',
-  'codesteer-agno-architect': 'Python Multi-agent',
-  'codesteer-electron': 'CDP Desktop Automation',
-  'codesteer-grill-me': 'Adversarial Spec Review',
-  'codesteer-instruction-densifier': 'Prompt Optimization',
+  'advanced-elicitation': 'Prompt elicitation',
+  'agno-architect': 'Python Multi-agent',
+  'avaliador-de-prompt': 'Prompt Review & Scoring',
+  'copywriting-persuasivo': 'Direct Response & Conversion',
+  'criador-persona': 'AI Persona Design',
+  'debate-entre-experts-tech': 'Multi-expert Decision',
+  'deep-research-prompt': 'Research Prompt Architecture',
   'design-to-html': 'Pure Static HTML/CSS',
+  'electron-automation': 'CDP Desktop Automation',
+  'extrair-contexto-de-negocio': 'Brand & Business Context',
+  'gerador-de-campanha': 'Short-form Video Campaigns',
+  'grill-me': 'Adversarial Spec Review',
+  'instruction-densifier': 'Prompt Optimization',
   'lgpd-implementation': 'Data Privacy & Compliance',
+  'photorealistic-image-generation': 'Photorealism & Optics',
   'pipeline-canary': 'CI/CD & Healthcheck',
 };
 
@@ -530,7 +543,17 @@ const TAILWIND_CONFIG_SCRIPT = `tailwind.config={
         "surface-container-highest":"#d4e4f6",
         "on-tertiary-container":"#fefcff",
         "badge-security-text":"#4338CA",
-        "badge-security-bg":"#EEF2FF"
+        "badge-security-bg":"#EEF2FF",
+        "badge-creative-text":"#7E22CE",
+        "badge-creative-bg":"#FAF5FF",
+        "badge-marketing-text":"#BE123C",
+        "badge-marketing-bg":"#FFE4E6",
+        "badge-prompt-text":"#0F766E",
+        "badge-prompt-bg":"#CCFBF1",
+        "badge-frontend-text":"#C2410C",
+        "badge-frontend-bg":"#FFEDD5",
+        "badge-automation-text":"#475569",
+        "badge-automation-bg":"#E2E8F0"
       },
       borderRadius:{
         "DEFAULT":"0.25rem",

@@ -348,6 +348,8 @@ agent-skills-platform/
 │   ├── skills-catalog/            # Catálogo oficial de habilidades
 │   │   ├── skills/
 │   │   │   ├── (architecture)/
+│   │   │   ├── (creative)/
+│   │   │   ├── (marketing)/
 │   │   │   ├── (security)/
 │   │   │   ├── (testing)/
 │   │   │   └── (product)/
