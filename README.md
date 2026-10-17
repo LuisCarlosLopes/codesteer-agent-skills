@@ -87,6 +87,28 @@ As 4 tools, nesta ordem — cada uma entrega só o que a anterior não cobriu:
 
 ---
 
+## Instalar como plugin
+
+O catálogo inteiro é distribuído como **um plugin** (`codesteer-skills`, com todas as skills), no padrão [Agent Plugins 1.0](https://agent-plugins.org/), mais os manifests próprios de cada vendor. A pasta `plugins/codesteer-skills/` é **gerada** por `pnpm build:plugin` a partir de `packages/skills-catalog/skills/`: as skills ficam achatadas em `skills/<nome>/` e o frontmatter é normalizado para o spec agentskills.io. Não edite essa pasta à mão.
+
+| Plataforma | Manifest lido | Instalação |
+| :--- | :--- | :--- |
+| **Claude Code** | `.claude-plugin/marketplace.json` → `plugins/codesteer-skills/.claude-plugin/plugin.json` | `/plugin marketplace add LuisCarlosLopes/codesteer-agent-skills` e depois `/plugin install codesteer-skills@codesteer` |
+| **Claude.ai / Desktop** | idem | Customize → Plugins → adicionar o marketplace do GitHub, ou enviar o ZIP de `plugins/codesteer-skills/` |
+| **OpenAI Codex** | `.agents/plugins/marketplace.json` → `plugin.json` (Agent Plugins) | `codex plugin marketplace add LuisCarlosLopes/codesteer-agent-skills` e depois `codex plugin add codesteer-skills@codesteer` (ou `/plugins`) |
+| **ChatGPT (workspace)** | `.claude-plugin/marketplace.json` ou `.agents/plugins/marketplace.json` | o admin importa o marketplace do GitHub |
+| **GitHub Copilot CLI** | `.claude-plugin/marketplace.json` → `plugin.json` (Agent Plugins) | `copilot plugin marketplace add LuisCarlosLopes/codesteer-agent-skills` e depois `copilot plugin install codesteer-skills@codesteer` |
+| **VS Code (Copilot)** | idem | setting `"chat.plugins.marketplaces": ["LuisCarlosLopes/codesteer-agent-skills"]` e depois `@agentPlugins` na aba Extensions |
+| **Cursor** | `.cursor-plugin/marketplace.json` → `plugins/codesteer-skills/.cursor-plugin/plugin.json` | Customize → Plugins → *From GitHub Repository* → URL do repo |
+| **Gemini CLI** (legado) | `gemini-extension.json` no archive do GitHub Release | `gemini extensions install https://github.com/LuisCarlosLopes/codesteer-agent-skills` |
+| **Google Antigravity** | `plugin.json` (Agent Plugins) | `agy plugin install <clone>/plugins/codesteer-skills` (ou `agy plugin import gemini` depois de instalar no Gemini CLI) |
+
+Para testar localmente sem publicar: `claude --plugin-dir plugins/codesteer-skills`, `gemini extensions link plugins/codesteer-skills`, `agy plugin validate plugins/codesteer-skills` ou `cursor-agent --plugin-dir plugins/codesteer-skills`.
+
+O archive do Gemini CLI é publicado pelo workflow `release-plugin` ao criar uma tag `v<version>` que bate com `packages/skills-catalog/package.json`. O servidor MCP **não** vai no plugin (depende de `tsx`/pnpm); para ele, veja a seção acima.
+
+---
+
 ## Instalar uma skill individual (sem MCP)
 
 Se você deseja usar apenas uma skill específica sem manter o servidor MCP ativo, pode instalar a pasta canônica diretamente no seu projeto ou ambiente global via **symlink** (recomendado para manter sincronizado com atualizações do catálogo) ou **cópia direta**.
@@ -95,10 +117,12 @@ Se você deseja usar apenas uma skill específica sem manter o servidor MCP ativ
 
 | Agente / IDE | Escopo do Projeto (Local) | Escopo Global (Usuário) |
 | :--- | :--- | :--- |
+| **Universal** (Codex, Cursor, Copilot, Antigravity, Gemini CLI) | `.agents/skills/<nome-skill>/` | `~/.agents/skills/<nome-skill>/` |
 | **Cursor** | `.cursor/skills/<nome-skill>/` | `~/.cursor/skills/<nome-skill>/` |
 | **Claude Code** | `.claude/skills/<nome-skill>/` | `~/.claude/skills/<nome-skill>/` |
-| **Google Antigravity** | `.agent/skills/<nome-skill>/` ou `.gemini/skills/<nome-skill>/` | `~/.gemini/antigravity-cli/skills/<nome-skill>/` |
-| **GitHub Copilot** | `.github/skills/<nome-skill>/` | — |
+| **OpenAI Codex** | `.agents/skills/<nome-skill>/` | `~/.agents/skills/<nome-skill>/` |
+| **Google Antigravity** | `.agents/skills/<nome-skill>/` (legado: `.agent/skills/`) | App/IDE: `~/.gemini/config/skills/<nome-skill>/` · CLI: `~/.gemini/antigravity-cli/skills/<nome-skill>/` |
+| **GitHub Copilot** | `.github/skills/<nome-skill>/` (também lê `.claude/skills/` e `.agents/skills/`) | `~/.copilot/skills/<nome-skill>/` |
 | **Windsurf** | `.windsurf/skills/<nome-skill>/` | `~/.windsurf/skills/<nome-skill>/` |
 | **Cline / Roo Code** | `.cline/skills/<nome-skill>/` | `~/.cline/skills/<nome-skill>/` |
 
@@ -116,6 +140,8 @@ mkdir -p .cursor/skills
 cp -R "/caminho/absoluto/codesteer-agent-skill/packages/skills-catalog/skills/product/grill-me" .cursor/skills/grill-me
 ```
 
+Clientes estritos com o spec agentskills.io (por exemplo, `metadata` só com strings e `description` ≤ 1024 caracteres) aceitam melhor a cópia normalizada em `plugins/codesteer-skills/skills/<nome-skill>/`. Use-a como origem do symlink se o agente rejeitar a pasta canônica.
+
 O agente lerá o `SKILL.md` automaticamente e ativará as instruções com base no gatilho `"Use when"` definido no frontmatter, consultando as pastas `references/` e `templates/` sob demanda.
 
 ---
@@ -131,7 +157,8 @@ O agente lerá o `SKILL.md` automaticamente e ativará as instruções com base 
 2. Preencha o frontmatter de `SKILL.md`: `name` (igual à pasta), `description` com **"Use when"** e **"Do NOT use for"** (literais em inglês), `metadata`, `compatibility` e `sandbox`.
 3. Não coloque `README.md` na pasta da skill. Manuais longos vão em `references/`; scripts em `scripts/`; templates em `templates/`.
 4. Corpo de `SKILL.md` ≤ 500 linhas. Pastas e arquivos em kebab-case.
-5. (Maintainer) Abra um PR interno. A CI roda os mesmos gates locais abaixo. Contribuições externas ainda não são aceitas.
+5. Rode `pnpm build:plugin` e commite `plugins/codesteer-skills/` e os marketplaces junto com a skill. A CI falha se o plugin estiver fora de sincronia.
+6. (Maintainer) Abra um PR interno. A CI roda os mesmos gates locais abaixo. Contribuições externas ainda não são aceitas.
 
 ---
 
@@ -140,6 +167,7 @@ O agente lerá o `SKILL.md` automaticamente e ativará as instruções com base 
 ```bash
 pnpm test              # tsc --noEmit + vitest
 pnpm validate:skills   # formato canônico (bloqueante)
+pnpm build:plugin --check  # plugin gerado em sincronia com o catálogo (bloqueante)
 pnpm scan:skills       # heurística de supply chain em scripts/ (bloqueante)
 pnpm compile:catalog   # gera packages/skills-catalog/dist/skills-registry.json (gitignorado)
 pnpm catalog:html      # gera packages/skills-catalog/dist/index.html (gitignorado)
@@ -149,11 +177,13 @@ pnpm catalog:html      # gera packages/skills-catalog/dist/index.html (gitignora
 
 Pipeline interno (3 estágios sobre a mesma árvore `skills/`):
 
-1. **`tools/validate-skills.ts`** — kebab-case, frontmatter tipado, `name` == pasta, presença de *Use when* / *Do NOT use for*, corpo ≤ 500 linhas, sem `README.md`.
+1. **`tools/validate-skills.ts`** — kebab-case, frontmatter tipado, `name` == pasta e único entre categorias, presença de *Use when* / *Do NOT use for*, `description` ≤ 1024 caracteres, corpo ≤ 500 linhas, sem `README.md`.
 2. **`packages/skills-catalog/src/scan-skills.ts`** — `rm -rf /`, `curl | bash`, nomes de segredos. Substituto mínimo do Snyk/LLM-guard do blueprint; não detecta jailbreak semântico.
 3. **`packages/skills-catalog/src/compile-catalog.ts`** — registry JSON com hashes.
 
 O gerador `packages/skills-catalog/src/generate-catalog-html.ts` é irmão do compile: emite o HTML estático publicado no GitHub Pages, sem alterar o algoritmo de hash.
+
+`tools/build-plugin.ts` empacota a mesma árvore como plugin (`plugins/codesteer-skills/` + marketplaces). A saída é versionada porque o plugin é instalado clonando o repo.
 
 ---
 
@@ -162,12 +192,14 @@ O gerador `packages/skills-catalog/src/generate-catalog-html.ts` é irmão do co
 ```text
 packages/skills-catalog/   # skills + compiler + scanner + gerador HTML
 packages/mcp-server/       # MCP stdio local
-tools/                     # validador + gerador de scaffold
+tools/                     # validador + gerador de scaffold + gerador do plugin
+plugins/codesteer-skills/  # plugin gerado (Agent Plugins + Claude/Cursor/Gemini) — não editar
+.claude-plugin/ .agents/plugins/ .cursor-plugin/   # marketplaces gerados (Claude/Copilot, Codex, Cursor)
 cognitive-base/            # decisões e specs (Obsidian, 6 quadrantes)
 arquitetura_plataforma_skills_mcp.md   # blueprint ASP (alvo completo)
 ```
 
-O blueprint descreve CLI, portal web, `libs/core`, registry HTTP e embeddings. **Esta fatia implementa** autoria + gates + compilação do registry + MCP stdio + página HTML no GitHub Pages. O consumo no agente pode ser dinâmico via MCP (`pnpm mcp:catalog`) ou estático via instalação direta (symlink/cópia) de cada skill.
+O blueprint descreve CLI, portal web, `libs/core`, registry HTTP e embeddings. **Esta fatia implementa** autoria + gates + compilação do registry + MCP stdio + página HTML no GitHub Pages. O consumo no agente pode ser dinâmico via MCP (`pnpm mcp:catalog`), via plugin (`codesteer-skills`) ou estático via instalação direta (symlink/cópia) de cada skill.
 
 Formato canônico: [`cognitive-base/decisions/dec-002-formato-canonico-skill.md`](cognitive-base/decisions/dec-002-formato-canonico-skill.md).
 

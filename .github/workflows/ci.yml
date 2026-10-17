@@ -27,6 +27,9 @@ jobs:
       - name: Validate skills
         run: pnpm validate:skills
 
+      - name: Check plugin in sync
+        run: pnpm build:plugin --check
+
       - name: Scan skills
         run: pnpm scan:skills
 

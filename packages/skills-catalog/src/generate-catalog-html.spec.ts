@@ -266,6 +266,31 @@ describe('generate-catalog-html', () => {
     expect(html).toContain('text-badge-marketing-text');
     expect(html).toContain('Direct Response & Conversion');
   });
+
+  it('aplica o design system The Cognitive Control Room (DESING.md): paleta, fontes e paper panel', () => {
+    const { html } = generateCatalogHtml({ registry: registryOf([sampleSkill()]) });
+
+    // Paleta oficial de DESING.md
+    expect(html).toContain('--mind-bg: #171918');
+    expect(html).toContain('--mind-surface: #202321');
+    expect(html).toContain('--mind-border: #3b403b');
+    expect(html).toContain('--mind-text: #eeeae0');
+    expect(html).toContain('--mind-text-secondary: #b5b9ad');
+    expect(html).toContain('--mind-paper: #eee9dc');
+    expect(html).toContain('--mind-ink: #232b28');
+    expect(html).toContain('--mind-accent: #ff975f');
+    expect(html).toContain('--mind-indigo: #b2b9ff');
+    expect(html).toContain('--mind-green: #b8ce9c');
+
+    // Tipografia oficial (Sora, DM Sans, JetBrains Mono)
+    expect(html).toContain('Sora');
+    expect(html).toContain('DM Sans');
+    expect(html).toContain('JetBrains Mono');
+
+    // Paper panel (#eee9dc com ink #232b28)
+    expect(html).toContain('paper-panel');
+
+    // Painel de filtro em fluxo normal do documento (sem sticky sobrepondo os cards no scroll)
+    expect(html).not.toContain('sticky top-');
+  });
 });
-
-

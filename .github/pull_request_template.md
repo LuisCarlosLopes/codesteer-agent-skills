@@ -15,6 +15,7 @@ Preencha quando o PR tocar `packages/skills-catalog/skills/`:
 - [ ] `description` contém "Use when" e "Do NOT use for"
 - [ ] Sem `README.md` na pasta da skill
 - [ ] `pnpm validate:skills`, `pnpm scan:skills` e `pnpm compile:catalog` passam localmente
+- [ ] `pnpm build:plugin` rodado e `plugins/codesteer-skills/` + marketplaces commitados (o CI roda `--check`)
 
 ## Checklist da Base Cognitiva
 

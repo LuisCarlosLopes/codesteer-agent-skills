@@ -73,6 +73,37 @@ ${body}
     expect(result.violations.some((item) => item.includes('500'))).toBe(true);
   });
 
+  it('rejeita description com mais de 1024 caracteres', () => {
+    const root = mkdtempSync(path.join(tmpdir(), 'skill-long-description-'));
+    const skillDir = path.join(root, 'testing', 'long-description');
+    mkdirSync(skillDir, { recursive: true });
+    const filler = 'x'.repeat(1024);
+    writeFileSync(
+      path.join(skillDir, 'SKILL.md'),
+      `---
+name: long-description
+description: Use when testing description size ${filler}. Do NOT use for production agents.
+metadata:
+  version: 0.0.1
+  author: "@codesteer"
+  license: Apache-2.0
+compatibility:
+  min_agent_tier: 1
+  requires_terminal: false
+sandbox:
+  network: false
+  allow_exec: false
+---
+
+# Long description
+`,
+      'utf8',
+    );
+    const result = validateSkillsRoot(root);
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((item) => item.includes('1024'))).toBe(true);
+  });
+
   it('rejeita pasta ou arquivo que não seja kebab-case', () => {
     const folder = validateSkillsRoot(fixture('invalid-not-kebab'));
     expect(folder.ok).toBe(false);
@@ -81,6 +112,12 @@ ${body}
     const file = validateSkillsRoot(fixture('invalid-file-not-kebab'));
     expect(file.ok).toBe(false);
     expect(file.violations.some((item) => item.includes('NotKebab.md'))).toBe(true);
+  });
+
+  it('rejeita nome de skill repetido em categorias diferentes', () => {
+    const result = validateSkillsRoot(fixture('invalid-duplicate-name'));
+    expect(result.ok).toBe(false);
+    expect(result.violations.some((item) => item.includes('nome de skill duplicado'))).toBe(true);
   });
 
   it('rejeita name do frontmatter diferente do nome da pasta', () => {

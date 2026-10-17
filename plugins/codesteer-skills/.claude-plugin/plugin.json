@@ -1,0 +1,18 @@
+{
+  "name": "codesteer-skills",
+  "description": "Catálogo codesteer de skills para agentes de IA: arquitetura, automação, criativo, frontend, marketing, produto, engenharia de prompt, segurança e testes.",
+  "author": {
+    "name": "Luis Carlos Lopes Jr."
+  },
+  "homepage": "https://luiscarloslopes.github.io/codesteer-agent-skills/",
+  "repository": "https://github.com/LuisCarlosLopes/codesteer-agent-skills",
+  "license": "Apache-2.0",
+  "keywords": [
+    "agent-skills",
+    "skills",
+    "prompt-engineering",
+    "product",
+    "marketing",
+    "frontend"
+  ]
+}

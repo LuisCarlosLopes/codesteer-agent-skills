@@ -12,6 +12,7 @@ pnpm install
 # Os gates — idênticos aos passos do .github/workflows/ci.yml
 pnpm test              # tsc --noEmit -p tsconfig.base.json && vitest run
 pnpm validate:skills   # formato canônico da skill (bloqueante)
+pnpm build:plugin      # regenera plugins/codesteer-skills/ + marketplaces (versionados); --check no CI é bloqueante
 pnpm scan:skills       # varredura heurística de segurança (bloqueante)
 pnpm compile:catalog   # gera packages/skills-catalog/dist/skills-registry.json (gitignorado)
 pnpm catalog:html      # gera packages/skills-catalog/dist/index.html (gitignorado)
@@ -45,11 +46,17 @@ O fluxo é um pipeline de 3 estágios sobre a mesma árvore `packages/skills-cat
 2. **`packages/skills-catalog/src/scan-skills.ts`** — scanner heurístico de supply chain sobre `scripts/`: `rm -rf /`, `curl | bash`, nomes de segredos. Substituto mínimo do Snyk/LLM-guard previsto no blueprint; não detecta jailbreak semântico.
 3. **`packages/skills-catalog/src/compile-catalog.ts`** — calcula SHA-256 por arquivo e emite `dist/skills-registry.json` conforme `src/types.ts`.
 
-O gerador `packages/skills-catalog/src/generate-catalog-html.ts` é irmão do compile: emite `dist/index.html` (GitHub Pages + tool MCP `generate_catalog_html`), sem alterar o algoritmo de hash.
+**`tools/build-plugin.ts`** empacota a mesma árvore como plugin único `codesteer-skills` (ADR `dec-007`): achata `skills/<categoria>/<nome>` em `plugins/codesteer-skills/skills/<nome>` (por isso o validador exige `name` único entre categorias e `description` ≤ 1024), normaliza o frontmatter da cópia para o spec agentskills.io (`metadata` só strings, `compatibility` texto) e emite `plugin.json` (Agent Plugins 1.0 — mínimo `$schema`/`name`/`description` por causa do schema fechado do Antigravity), `.claude-plugin/plugin.json` (sem `version` → updates por commit), `.cursor-plugin/plugin.json`, `gemini-extension.json` e os marketplaces da raiz (`.claude-plugin/`, `.agents/plugins/`, `.cursor-plugin/`). A saída é versionada e determinística: editou uma skill → rode `pnpm build:plugin` e commite; nunca edite `plugins/` à mão. Tag `v<version de packages/skills-catalog/package.json>` dispara `release-plugin.yml` (archive para o Gemini CLI). Validação local: `claude plugin validate ./plugins/codesteer-skills`, `agy plugin validate plugins/codesteer-skills --strict`, `gemini extensions validate plugins/codesteer-skills`.
+
+O gerador `packages/skills-catalog/src/generate-catalog-html.ts` é irmão do compile (`cognitive-base/decisions/dec-006-…`): emite `dist/index.html` (GitHub Pages + tool MCP `generate_catalog_html`), sem alterar o algoritmo de hash. Na CI, push em `main` publica `packages/skills-catalog/dist` no Pages. O HTML é auto-contido: Tailwind CDN + Google Fonts, e os assets de marca de `packages/skills-catalog/brand/` entram como data-URI via `catalog-brand.ts` (sem fetch em runtime). O visual segue os tokens de **`DESING.md`** na raiz (design system "The Cognitive Control Room" — a grafia `DESING` é o nome real do arquivo); mudança de cor/tipografia no catálogo deve partir de lá. `description` precisa passar pelo escape HTML (risco de XSS); o corpo de `SKILL.md` nunca é embutido.
+
+### Servidor MCP (`packages/mcp-server`)
+
+FastMCP stdio (`@prefecthq/fastmcp-ts` + Zod). `src/catalog/` carrega o mesmo catálogo e expõe progressive disclosure em 4 tools, nesta ordem: `search_skills` (metadados, nunca o corpo) → `read_skill` (`SKILL.md` + listas de paths) → `fetch_skill_files` (conteúdo de `references/`/`templates/`; recusa `scripts/`) → `prepare_skill_files` (staging em `~/.cache/agent-skills/staged/<revision-hash>` ou `dry_run`; **nunca executa**). `generate_catalog_html` fica fora da cadeia. Invariantes: todo conteúdo é conferido contra o SHA-256 antes de ser devolvido (mismatch não entrega nada); traversal e paths fora do manifesto são recusados; stdout é o protocolo JSON-RPC — nada de `console.log` no caminho de start. Ao adicionar uma tool, registre-a em `server.ts` e em `CATALOG_TOOL_NAMES`.
 
 `SkillFrontmatter` / `RegistrySkill` / `SkillsRegistry` em `packages/skills-catalog/src/types.ts` são o contrato compartilhado — validador, scanner e compilador parseiam o frontmatter independentemente, então mudar o schema exige tocar os três.
 
-Fixtures de validação vivem em `tools/__fixtures__/skills/<caso>/` — uma pasta por violação esperada (`invalid-no-use-when`, `invalid-readme`, …) mais `valid/`. Ao adicionar uma regra de validação, adicione a fixture correspondente.
+Fixtures de validação vivem em `tools/__fixtures__/skills/<caso>/` — uma pasta por violação esperada (`invalid-no-use-when`, `invalid-readme`, …) mais `valid/`. Ao adicionar uma regra de validação, adicione a fixture correspondente. Já `skills/testing/pipeline-canary` é uma skill real do catálogo que serve de canário do pipeline; os specs do compile, do HTML e do MCP dependem dela — não remova.
 
 Regras recorrentes: skills são escritas para LLMs, não para humanos (daí a proibição de `README.md` dentro da pasta); manuais longos vão em `references/`, scripts em `scripts/`, templates em `templates/`.
 
@@ -70,7 +77,9 @@ O workflow `doc-quality` roda `.github/scripts/cb/audit.py` (mesmo auditor do `c
 ## Convenções
 
 - Documentação, mensagens de erro e comentários em pt-BR. `SKILL.md` pode ser escrito em pt-BR ou inglês, mas os gatilhos literais `"Use when"` / `"Do NOT use for"` são exigidos na `description` em inglês.
-- Comentários âncora `// @MindContext:`, `@MindSpec:`, `@MindFlow:`, `@MindRisk:`, `@MindDecision:` no topo dos módulos de pipeline resumem propósito, contrato e risco — mantenha o padrão ao criar módulos novos.
+- Comentários âncora `// @MindContext:`, `@MindSpec:`, `@MindFlow:`, `@MindRisk:`, `@MindDecision:`, `@MindWhy:`, `@MindTest:` (aponta o spec) no topo dos módulos de pipeline resumem propósito, contrato e risco — mantenha o padrão ao criar módulos novos.
 - Scripts TS rodam via `tsx` com imports `.ts` explícitos (`allowImportingTsExtensions`, `noEmit`). Cada entrypoint é também módulo importável: o bloco de execução fica atrás de um guard `isInvokedDirectly()`.
 - `.github/pull_request_template.md` traz os checklists de skill e de base cognitiva — preencha o que o PR tocar.
 - `.memory-bank/plans/<slug>/` (gitignorado) guarda os artefatos do pipeline codesteer — `plan.md`, `task.md`, `architecture.md`, `delivery.md`. Útil como contexto do que foi planejado; não é entregável versionado.
+- `.cursor/` e `design-systems/` também são gitignorados (config local do MCP e rascunhos de design) — não dependa deles em código ou docs versionados.
+- Repo Apache-2.0, **fechado a contribuições externas** (`CONTRIBUTING.md`): o workflow `close-external-contributions` fecha PRs de forks. O trabalho do maintainer é por branch interna + PR no próprio remoto.

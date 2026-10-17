@@ -1,0 +1,47 @@
+name: release-plugin
+
+# Publica o archive do plugin no GitHub Release: `gemini extensions install <repo>` usa o asset
+# (gemini-extension.json precisa estar na raiz do archive). Claude, Codex, Copilot e Cursor leem o repo direto.
+
+on:
+  push:
+    tags: ['v*']
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Check plugin in sync
+        run: pnpm build:plugin --check
+
+      - name: Check tag matches catalog version
+        run: |
+          version="v$(node -p "require('./packages/skills-catalog/package.json').version")"
+          if [ "$version" != "$GITHUB_REF_NAME" ]; then
+            echo "tag $GITHUB_REF_NAME difere da version de packages/skills-catalog/package.json ($version)"
+            exit 1
+          fi
+
+      - name: Pack plugin
+        run: tar -czf codesteer-skills.tar.gz -C plugins/codesteer-skills .
+
+      - name: Publish release asset
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release view "$GITHUB_REF_NAME" >/dev/null 2>&1 || gh release create "$GITHUB_REF_NAME" --generate-notes
+          gh release upload "$GITHUB_REF_NAME" codesteer-skills.tar.gz --clobber
