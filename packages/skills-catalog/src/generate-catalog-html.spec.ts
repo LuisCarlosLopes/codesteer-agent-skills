@@ -293,4 +293,31 @@ describe('generate-catalog-html', () => {
     // Painel de filtro em fluxo normal do documento (sem sticky sobrepondo os cards no scroll)
     expect(html).not.toContain('sticky top-');
   });
+
+  it('exibe a tradução PT-BR da descrição no card do site e mantém busca bilíngue PT/EN', () => {
+    const grill = sampleSkill({
+      name: 'grill-me',
+      category: 'product',
+      description: 'Adversarial interrogation of a plan. Use when grilling. Do NOT use for coding.',
+    });
+
+    const { html } = generateCatalogHtml({ registry: registryOf([grill]) });
+
+    // Texto visível no card em PT-BR
+    expect(html).toContain('Interrogatório adversarial de um plano');
+    expect(html).toContain('Não usar para: implementar, depurar ou revisar código já escrito');
+
+    // Filtro por termo em PT-BR e por termo em EN
+    const byPtBr = generateCatalogHtml({
+      registry: registryOf([grill]),
+      filters: { description: 'interrogatório adversarial' },
+    });
+    const byEn = generateCatalogHtml({
+      registry: registryOf([grill]),
+      filters: { description: 'grilling' },
+    });
+
+    expect(byPtBr.skillCount).toBe(1);
+    expect(byEn.skillCount).toBe(1);
+  });
 });

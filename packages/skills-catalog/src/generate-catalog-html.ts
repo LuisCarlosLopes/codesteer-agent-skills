@@ -2,12 +2,13 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { codeSteerIconSrc, ideLogos } from './catalog-brand.ts';
+import { getSkillTranslationPtBr } from './catalog-translations.ts';
 import { compileCatalog, defaultCompileOptions } from './compile-catalog.ts';
 import type { RegistrySkill, SkillsRegistry } from './types.ts';
 
 // @MindContext: Gerador de catálogo HTML estático baseado no Design System CodeSteer ("The Cognitive Control Room" — DESING.md)
-// @MindFlow: Filtrar SkillsRegistry → escapar campos → template auto-contido (dark canvas #171918, Sora/DM Sans/JetBrains Mono, 3 role colors, paper panel #eee9dc) → dist/index.html
-// @MindSpec: Filtros category exact / name+description substring case-insensitive; vazio ou * omite o filtro
+// @MindFlow: Filtrar SkillsRegistry → traduzir descrição p/ PT-BR no site (com fallback EN) → escapar campos → dist/index.html
+// @MindSpec: Filtros category exact / name+description substring case-insensitive (bilíngue PT-BR + EN); vazio ou * omite o filtro
 // @MindDecision: HTML auto-contido com Tailwind CDN, Google Fonts (Sora, DM Sans, JetBrains Mono), Material Symbols e SVGs de IDE inline
 // @MindRisk: XSS via description — escape obrigatório; não embutir corpo de SKILL.md nem files[].contentHash
 
@@ -70,8 +71,14 @@ export function filterRegistrySkills(skills: RegistrySkill[], filters?: CatalogH
     if (nameNeedle !== undefined && !skill.name.toLowerCase().includes(nameNeedle)) {
       return false;
     }
-    if (descriptionNeedle !== undefined && !skill.description.toLowerCase().includes(descriptionNeedle)) {
-      return false;
+    if (descriptionNeedle !== undefined) {
+      const ptBr = getSkillTranslationPtBr(skill.name);
+      const searchableDesc = ptBr
+        ? `${skill.description} ${ptBr.summary} ${ptBr.doNotUse}`.toLowerCase()
+        : skill.description.toLowerCase();
+      if (!searchableDesc.includes(descriptionNeedle)) {
+        return false;
+      }
     }
     return true;
   });
@@ -166,7 +173,13 @@ function renderSkillCard(skill: RegistrySkill): string {
   const description = escapeHtml(rawDescription);
   const dataName = escapeHtml(skill.name.toLowerCase());
   const dataCategory = escapeHtml(skill.category);
-  const dataDescription = escapeHtml(rawDescription.toLowerCase());
+
+  // Busca tradução PT-BR exclusiva do site; se existir, exibe em português e indexa ambos os idiomas para filtro
+  const ptBr = getSkillTranslationPtBr(skill.name);
+  const combinedSearchDesc = ptBr
+    ? `${rawDescription} ${ptBr.summary} ${ptBr.doNotUse}`.toLowerCase()
+    : rawDescription.toLowerCase();
+  const dataDescription = escapeHtml(combinedSearchDesc);
 
   const catStyle = CATEGORY_STYLES[skill.category] ?? {
     bg: 'bg-badge-default-bg',
@@ -176,19 +189,27 @@ function renderSkillCard(skill: RegistrySkill): string {
 
   const tagLabel = SKILL_THEME_TAGS[skill.name] ?? escapeHtml(skill.category);
 
-  // Separa o gatilho positivo ("Use when") da restrição explícita ("Do NOT use") em um well interno escuro
+  // Separa o gatilho positivo da restrição explícita em um well interno escuro (priorizando a tradução PT-BR no site)
   let descBodyHtml: string;
-  const doNotUseMatch = rawDescription.match(/\bDo NOT use\b/i);
-  if (doNotUseMatch && doNotUseMatch.index !== undefined) {
-    const mainPart = rawDescription.slice(0, doNotUseMatch.index).trim();
-    const doNotUsePart = rawDescription.slice(doNotUseMatch.index).trim();
-    descBodyHtml = `<p class="text-mind-text-secondary">${escapeHtml(mainPart)}</p>
+  if (ptBr !== undefined) {
+    descBodyHtml = `<p class="text-mind-text-secondary">${escapeHtml(ptBr.summary)}</p>
+<div class="p-3 rounded-xl bg-mind-bg/60 border border-mind-border/60 text-sm text-mind-text/90 flex items-start gap-2.5">
+  <span class="material-symbols-outlined text-[16px] text-mind-accent shrink-0 mt-0.5" aria-hidden="true">block</span>
+  <span>${escapeHtml(ptBr.doNotUse)}</span>
+</div>`;
+  } else {
+    const doNotUseMatch = rawDescription.match(/\bDo NOT use\b/i);
+    if (doNotUseMatch && doNotUseMatch.index !== undefined) {
+      const mainPart = rawDescription.slice(0, doNotUseMatch.index).trim();
+      const doNotUsePart = rawDescription.slice(doNotUseMatch.index).trim();
+      descBodyHtml = `<p class="text-mind-text-secondary">${escapeHtml(mainPart)}</p>
 <div class="p-3 rounded-xl bg-mind-bg/60 border border-mind-border/60 text-sm text-mind-text/90 flex items-start gap-2.5">
   <span class="material-symbols-outlined text-[16px] text-mind-accent shrink-0 mt-0.5" aria-hidden="true">block</span>
   <span>${escapeHtml(doNotUsePart)}</span>
 </div>`;
-  } else {
-    descBodyHtml = `<p class="text-mind-text-secondary">${description}</p>`;
+    } else {
+      descBodyHtml = `<p class="text-mind-text-secondary">${description}</p>`;
+    }
   }
 
   return `<article class="skill-card group rounded-2xl bg-mind-surface/30 backdrop-blur-md border border-mind-border/55 hover:border-mind-accent/40 p-6 md:p-8 flex flex-col justify-between transition-colors duration-200 ease-out" data-skill-card data-name="${dataName}" data-category="${dataCategory}" data-description="${dataDescription}" data-raw-desc="${description}">
