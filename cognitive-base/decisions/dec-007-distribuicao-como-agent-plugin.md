@@ -4,7 +4,7 @@ type: adr
 title: Distribuição do catálogo como plugin único no padrão Agent Plugins, com manifests de vendor
 status: draft
 created: "2026-10-17"
-updated: "2026-10-17"
+updated: "2026-10-18"
 author: "@luiscarloslopesjr"
 links:
   - id: dec-002
@@ -54,6 +54,7 @@ O catálogo é distribuído como **um plugin único**, `codesteer-skills`, em `p
 
 - **Saída versionada e determinística.** O plugin é instalado clonando o repo, e `dist/` está no gitignore. Por isso a cópia vai para o Git, marcada como `linguist-generated`. O CI roda `pnpm build:plugin --check` e bloqueia drift.
 - **Release do Gemini.** Uma tag `v<version>` (igual à de `packages/skills-catalog/package.json`) dispara `release-plugin.yml`, que publica o archive com `gemini-extension.json` na raiz.
+- **Patch automático.** O PR não mexe na `version`. No merge em `main` que altera `packages/skills-catalog/skills/**` ou `tools/build-plugin.ts`, `.github/workflows/bump-plugin-version.yml` sobe o patch, roda `pnpm build:plugin` e cria a tag no commit seguinte. O push autentica com a deploy key `plugin-version-bump` (bypass do ruleset Protect main — repositório pessoal não aceita o app GitHub Actions como bypass). A tag dispara `release-plugin.yml`. Minor e major continuam manuais.
 
 ## Alternativas Consideradas
 
@@ -67,7 +68,7 @@ O catálogo é distribuído como **um plugin único**, `codesteer-skills`, em `p
 
 ## Consequências
 
-- Toda mudança de skill exige `pnpm build:plugin` e o commit da saída. O CI falha se a cópia estiver fora de sincronia, e a cópia nunca é editada à mão.
+- Toda mudança de skill exige `pnpm build:plugin` e o commit da saída, na `version` que já está em `main`. O CI falha se a cópia estiver fora de sincronia, e a cópia nunca é editada à mão. O patch seguinte é commit do Actions depois do merge.
 - O `contentHash` do [[meta/glossary#registry|registry]] ([[dec-005-integridade-supply-chain]]) continua calculado sobre a árvore canônica. Os `SKILL.md` normalizados do plugin têm hash diferente, de propósito.
 - `.claude-plugin/plugin.json` sem `version` faz cada commit virar versão nova (updates automáticos), mas `claude plugin validate --strict` emite warning. Validamos sem `--strict`.
 - Com o `plugin.json` Agent Plugins presente, o Copilot ignora `.claude-plugin/`. Isso é aceitável porque o plugin só carrega skills.
@@ -86,4 +87,5 @@ O catálogo é distribuído como **um plugin único**, `codesteer-skills`, em `p
 
 | Versão | Data       | Autor                | Descrição |
 | ------ | ---------- | -------------------- | --------- |
+| 1.1.0  | 2026-10-18 | @luiscarloslopesjr   | Patch da `version` sobe no merge em `main` (`bump-plugin-version.yml`), com push pela deploy key `plugin-version-bump` |
 | 1.0.0  | 2026-10-17 | @luiscarloslopesjr   | ADR draft: plugin único Agent Plugins + manifests Claude/Cursor/Gemini/Codex |

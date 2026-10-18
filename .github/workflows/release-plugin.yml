@@ -2,6 +2,7 @@ name: release-plugin
 
 # Publica o archive do plugin no GitHub Release: `gemini extensions install <repo>` usa o asset
 # (gemini-extension.json precisa estar na raiz do archive). Claude, Codex, Copilot e Cursor leem o repo direto.
+# A tag vX.Y.Z é criada por bump-plugin-version com a deploy key, então este workflow dispara.
 
 on:
   push:

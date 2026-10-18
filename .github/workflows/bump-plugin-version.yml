@@ -1,0 +1,114 @@
+name: bump-plugin-version
+
+# Sobe o patch de packages/skills-catalog/package.json depois do merge em main,
+# regenera o plugin e publica a tag vX.Y.Z. O push da tag dispara release-plugin.
+#
+# Protect main exige pull request e não aceita o app GitHub Actions como bypass
+# em repositório pessoal. O push usa a deploy key plugin-version-bump (id 166841262),
+# que está no bypass desse ruleset, via secret PLUGIN_VERSION_DEPLOY_KEY.
+# O GITHUB_TOKEN deste workflow fica só com contents: read.
+# Protect tags não tem bypass — a tag nova pode ser criada, mas não movida nem apagada.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/skills-catalog/skills/**'
+      - 'tools/build-plugin.ts'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bump-plugin-version
+  cancel-in-progress: false
+
+jobs:
+  bump:
+    if: "${{ !startsWith(github.event.head_commit.message, 'chore(plugin): bump version to ') }}"
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deploy key secret
+        env:
+          PLUGIN_VERSION_DEPLOY_KEY: ${{ secrets.PLUGIN_VERSION_DEPLOY_KEY }}
+        run: |
+          if [ -z "$PLUGIN_VERSION_DEPLOY_KEY" ]; then
+            echo "secret PLUGIN_VERSION_DEPLOY_KEY ausente"
+            exit 1
+          fi
+
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+          ssh-key: ${{ secrets.PLUGIN_VERSION_DEPLOY_KEY }}
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: pnpm
+
+      - name: Install
+        run: pnpm install --frozen-lockfile
+
+      - name: Bump patch, rebuild plugin, push commit and tag
+        run: |
+          set -euo pipefail
+
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          pushed=0
+          version=""
+          for attempt in 1 2 3; do
+            git fetch origin main
+            git checkout -B release-bump origin/main
+
+            version="$(node <<'EOF'
+          const fs = require('fs');
+          const path = 'packages/skills-catalog/package.json';
+          const pkg = JSON.parse(fs.readFileSync(path, 'utf8'));
+          const parts = pkg.version.split('.');
+          if (parts.length !== 3 || parts.some((part) => !/^[0-9]+$/.test(part))) {
+            console.error(`version invalida: ${pkg.version}`);
+            process.exit(1);
+          }
+          parts[2] = String(Number(parts[2]) + 1);
+          pkg.version = parts.join('.');
+          fs.writeFileSync(path, JSON.stringify(pkg, null, 2) + '\n');
+          process.stdout.write(pkg.version);
+          EOF
+            )"
+
+            pnpm build:plugin
+            git add -- packages/skills-catalog/package.json plugins/codesteer-skills .claude-plugin/marketplace.json .cursor-plugin/marketplace.json .agents/plugins/marketplace.json
+
+            while IFS= read -r name; do
+              case "$name" in
+                packages/skills-catalog/package.json|.claude-plugin/marketplace.json|.cursor-plugin/marketplace.json|.agents/plugins/marketplace.json) ;;
+                plugins/codesteer-skills/*) ;;
+                *)
+                  echo "bump recusou arquivo fora da version do plugin: ${name}"
+                  exit 1
+                  ;;
+              esac
+            done < <(git diff --cached --name-only)
+
+            git commit -m "chore(plugin): bump version to ${version}"
+
+            if git push origin HEAD:main; then
+              pushed=1
+              break
+            fi
+            echo "push em main rejeitado (tentativa ${attempt})"
+          done
+
+          if [ "$pushed" -ne 1 ]; then
+            echo "nao foi possivel publicar o bump em main; a deploy key plugin-version-bump precisa continuar no bypass do ruleset Protect main"
+            exit 1
+          fi
+
+          git tag "v${version}"
+          git push origin "v${version}"
