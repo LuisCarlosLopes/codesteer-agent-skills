@@ -4,7 +4,7 @@ type: service
 title: skills-catalog — autoria e compilação do registro
 status: draft
 created: "2026-09-14"
-updated: "2026-10-17"
+updated: "2026-10-18"
 author: "@luiscarloslopesjr"
 links:
   - id: gd-001
@@ -36,7 +36,7 @@ Pacote `packages/skills-catalog`: fonte editável das [[meta/glossary#skill|skil
 - Guarda skills em `skills/<categoria>/<nome>/` no formato canônico ([[dec-002-formato-canonico-skill]]).
 - `src/compile-catalog.ts` gera `skills-registry.json` (cadastro + [[meta/glossary#content-hash|content hashes]]) e `embeddings.json` ([[meta/glossary#embeddings|embeddings]] da `description`).
 - Nesta fatia, `src/generate-catalog-html.ts` (irmão do compile, [[dec-006-catalogo-html-estatico-github-pages]]) emite `dist/index.html` auto-contido a partir do mesmo registry — GitHub Pages e a tool MCP `generate_catalog_html`. Não altera o algoritmo de hash.
-- `tools/build-plugin.ts` ([[dec-007-distribuicao-como-agent-plugin]]) empacota as mesmas skills como plugin único `codesteer-skills` em `plugins/codesteer-skills/` (achatadas em `skills/<nome>/`, frontmatter normalizado para o spec agentskills.io), mais os marketplaces de Claude/Copilot, Codex e Cursor. A saída é versionada, e o CI bloqueia drift com `--check`. Não altera o algoritmo de hash do registry.
+- `tools/build-plugin.ts` ([[dec-007-distribuicao-como-agent-plugin]]) empacota as mesmas skills como plugin único `codesteer-skills` em `plugins/codesteer-skills/` (achatadas em `skills/<nome>/`, frontmatter normalizado para o spec agentskills.io), mais os marketplaces de Claude/Copilot, Codex e Cursor. A saída é versionada, e o CI bloqueia drift com `--check`. Não altera o algoritmo de hash do registry. A `version` lida por esse gerador mora em `packages/skills-catalog/package.json`; o patch sobe no merge em `main` via `.github/workflows/bump-plugin-version.yml`, que também cria a tag do release.
 - `src/scan-skills.ts` alimenta o scanner de segurança da CI ([[dec-005-integridade-supply-chain]]).
 - Categorias previstas: `(architecture)`, `(automation)`, `(creative)`, `(frontend)`, `(marketing)`, `(product)`, `(prompt-engineering)`, `(security)`, `(testing)`. Nomes de skill não levam prefixo da marca (`codesteer-`) — a marca é o catálogo, não a skill.
 
@@ -69,6 +69,7 @@ Engenharia de Arquitetura de Software · `@luiscarloslopesjr`
 
 | Versão | Data       | Autor                | Descrição |
 | ------ | ---------- | -------------------- | --------- |
+| 1.7.0  | 2026-10-18 | @luiscarloslopesjr   | Patch da version do plugin sobe no merge em `main` (`bump-plugin-version.yml`) |
 | 1.6.0  | 2026-10-17 | @luiscarloslopesjr   | Distribuição como plugin `codesteer-skills` via `tools/build-plugin.ts` ([[dec-007-distribuicao-como-agent-plugin]]) |
 | 1.5.0  | 2026-10-17 | @luiscarloslopesjr   | Categorias `prompt-engineering`, `frontend` e `automation`; skills realocadas e prefixo `codesteer-` removido dos nomes |
 | 1.4.0  | 2026-10-17 | @luiscarloslopesjr   | Categoria `marketing` (growth, copywriting, SEO e campanhas) |

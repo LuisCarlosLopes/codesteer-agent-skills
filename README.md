@@ -184,7 +184,7 @@ Todos os estágios leem a mesma árvore `packages/skills-catalog/skills/`:
 3. **`packages/skills-catalog/src/compile-catalog.ts`** gera o registry JSON com o hash de cada arquivo. Qualquer mudança de conteúdo muda o hash.
 4. **`tools/build-plugin.ts`** empacota as skills como plugin em `plugins/codesteer-skills/` e gera os marketplaces. A saída é versionada porque o plugin é instalado clonando o repositório.
 
-`generate-catalog-html.ts` reaproveita o registry para gerar a página publicada no GitHub Pages a cada push em `main`. Uma tag `v<version>` igual à `version` de `packages/skills-catalog/package.json` dispara o workflow `release-plugin`, que publica o archive usado pelo Gemini CLI.
+`generate-catalog-html.ts` reaproveita o registry para gerar a página publicada no GitHub Pages a cada push em `main`. No merge em `main` que altera `packages/skills-catalog/skills/**` ou `tools/build-plugin.ts`, o workflow `bump-plugin-version` sobe o patch da `version` de `packages/skills-catalog/package.json`, regenera o plugin e cria a tag `v<version>`. Essa tag dispara `release-plugin`, que publica o archive usado pelo Gemini CLI. O PR commit a cópia do plugin na versão que já está em `main`; o número novo sai só depois do merge.
 
 ---
 

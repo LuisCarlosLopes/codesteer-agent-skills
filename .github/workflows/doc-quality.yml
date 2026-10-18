@@ -12,6 +12,9 @@ on:
     paths:
       - 'cognitive-base/**.md'
 
+permissions:
+  contents: read
+
 jobs:
   audit:
     runs-on: ubuntu-latest
