@@ -5,7 +5,7 @@
   },
   "metadata": {
     "description": "Catálogo codesteer de skills para agentes de IA: arquitetura, automação, criativo, frontend, marketing, produto, engenharia de prompt, segurança e testes.",
-    "version": "0.0.1"
+    "version": "0.0.2"
   },
   "plugins": [
     {
