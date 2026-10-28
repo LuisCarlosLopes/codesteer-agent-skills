@@ -28,6 +28,46 @@ playwright-cli -s=sec-audit requests
 - Validar autenticacao e autorizacao em cada endpoint no backend (middleware/guard server-side).
 - Configurar `Access-Control-Allow-Origin` com lista explicita de origens confiaveis; nunca combinar refletor de origem arbitraria com `Access-Control-Allow-Credentials: true`.
 
+### Reflexao de origem no CORS (teste ativo nao destrutivo)
+A leitura passiva de cabecalhos so mostra a politica para a origem real. Para flagrar reflexao de origem arbitraria, repita a requisicao com um `Origin` forjado — e um GET, nao submete dados:
+
+```bash
+playwright-cli -s=sec-audit run-code "async page => {
+  const resp = await page.request.fetch(page.url(), { headers: { Origin: 'https://origem-nao-confiavel.example' } });
+  console.log(JSON.stringify({
+    allowOrigin: resp.headers()['access-control-allow-origin'] || null,
+    allowCredentials: resp.headers()['access-control-allow-credentials'] || null
+  }));
+}"
+```
+
+Origem refletida (ou `*`) com `allowCredentials: true` e **Critica**.
+
+### Open Redirect (redirecionamento nao validado)
+
+Parametros que aceitam destino externo viram vetor de phishing e de vazamento de token via `Referer`.
+
+#### O que procurar
+- Parametros `redirect`, `url`, `next`, `return`, `returnUrl`, `goto`, `dest`, `destination`, `continue`, `callback` em query strings, forms e fluxos de login/logout.
+- Redirecionamento apos autenticacao que confia cegamente no parametro.
+
+#### Comandos de inspecao (somente navegacao, sem submeter dados)
+```bash
+# Destino externo direto
+playwright-cli -s=sec-audit goto "https://alvo-autorizado.exemplo/login?redirect=https://origem-nao-confiavel.example"
+playwright-cli -s=sec-audit eval "location.origin"
+
+# Variantes de bypass (host externo escondido)
+playwright-cli -s=sec-audit goto "https://alvo-autorizado.exemplo/login?redirect=//origem-nao-confiavel.example"
+playwright-cli -s=sec-audit eval "location.origin"
+```
+
+`location.origin` diferente do alvo = redirecionamento externo aceito (**Alta**). Outras variantes: `/\origem-nao-confiavel.example`, `https://alvo-autorizado.exemplo@origem-nao-confiavel.example`.
+
+#### Como corrigir
+- Validar o destino contra uma allowlist de paths/origens internas; preferir redirecionamento por identificador mapeado no servidor em vez de URL crua no parametro.
+- Recusar URLs absolutas e esquemas (`//`, `https://`, `\\`) quando so o redirecionamento interno e esperado.
+
 ---
 
 ## 2. A04:2025 Cryptographic Failures & Transporte Inseguro
@@ -104,7 +144,10 @@ playwright-cli -s=sec-audit eval "(() => ({
 ### Verificacao de arquivos e caminhos expostos
 Durante uma auditoria autorizada, verifique se arquivos de configuracao, mapas de codigo ou documentacao interna estao expostos:
 - **Source maps (`.js.map`)**: verifique na saida de `playwright-cli -s=sec-audit requests` se arquivos `.js` incluem `//# sourceMappingURL=` acessivel publicamente.
-- **Endpoints de debug/metadados**: `/graphql` (introspection aberta em producao), `/swagger-ui.html`, `/openapi.json`, `/actuator/health`, `/.well-known/security.txt`.
+- **Controle de versao exposto** (vaza o codigo-fonte completo): `/.git/HEAD`, `/.svn/entries` — devem retornar 404/403.
+- **Arquivos de configuracao**: `/.env`, `/web.config`, `/appsettings.Development.json`, `/config.json`.
+- **Endpoints de debug/metadados**: `/graphql` (introspection aberta em producao), `/swagger-ui.html`, `/openapi.json`, `/actuator/health`, `/actuator/env` (Spring), `/trace.axd`, `/elmah.axd` (ASP.NET), `/.well-known/security.txt`.
+- **Comentarios HTML**: varra `document.documentElement.innerHTML` por `<!-- ... -->` contendo `todo|fixme|password|senha|secret|key|token|internal` (mascare segredos ao registrar).
 
 ---
 
@@ -161,6 +204,7 @@ Use os comandos da Fase 4 do `SKILL.md` (`cookie-list`, `localstorage-list`, `se
 ### O que procurar
 - Mensagens no `console` do navegador contendo tokens de sessao, payloads completos de usuarios, chaves de servicos ou stack traces detalhados.
 - Respostas HTTP de erro (`400`, `401`, `403`, `404`, `500`) retornando stack traces do backend, queries SQL ou caminhos internos do sistema de arquivos.
+- Impressao digital de SGBD nas respostas de erro que a aplicacao ja devolve (sem injetar payload): `/(ORA-\d|SQLSTATE|Microsoft SQL|Incorrect syntax|Unclosed quotation|syntax error at|PG::|mysqli?_)/i`.
 
 ### Comandos de inspecao
 ```bash
