@@ -4,7 +4,7 @@ description: >
   Conduct an authorized web application security audit and defensive pentest assessment using
   playwright-cli to detect OWASP Top 10 gaps, misconfigured HTTP security headers, insecure
   cookies, exposed secrets in DOM/Web Storage/network responses, CORS misconfigurations, broken
-  access control, and source map or debug leaks. Use when the user asks to run a security audit,
+  access control, open redirects, and source map, version-control or debug leaks. Use when the user asks to run a security audit,
   pentest a website or web app, inspect security headers, find security vulnerabilities or gaps
   with playwright-cli, or validate production readiness before launch. Do NOT use for unauthorized
   targets, destructive attacks, denial-of-service, credential brute-forcing, or LGPD/legal privacy
@@ -133,6 +133,20 @@ Verifique:
 - **Fingerprinting de servidor**: cabecalhos `Server`, `X-Powered-By`, `X-AspNet-Version` expondo versoes exatas de runtime/framework.
 - **CORS (`Access-Control-Allow-Origin`)**: verifique se endpoints autenticados retornam `*` ou refletem origens arbitrarias combinadas com `Access-Control-Allow-Credentials: true`.
 
+A inspecao passiva de `response-headers` so revela o valor servido para a origem real; uma politica que **reflete** qualquer origem passa despercebida. Confirme com uma unica leitura usando um `Origin` forjado (nao destrutivo: e um GET sem envio de dados):
+
+```bash
+playwright-cli -s=sec-audit run-code "async page => {
+  const resp = await page.request.fetch(page.url(), { headers: { Origin: 'https://origem-nao-confiavel.example' } });
+  console.log(JSON.stringify({
+    allowOrigin: resp.headers()['access-control-allow-origin'] || null,
+    allowCredentials: resp.headers()['access-control-allow-credentials'] || null
+  }));
+}"
+```
+
+Se `allowOrigin` refletir `https://origem-nao-confiavel.example` (ou retornar `*`) junto de `allowCredentials: true`, e **Critica**: qualquer site le respostas autenticadas da vitima.
+
 ### Fase 4: Higiene de Cookies, localStorage e sessionStorage
 
 ```bash
@@ -168,14 +182,20 @@ playwright-cli -s=sec-audit eval "(() => ({
     method: f.method,
     hasPasswordInput: !!f.querySelector('input[type=\"password\"]'),
     csrfFields: Array.from(f.querySelectorAll('input[type=\"hidden\"]')).map(i => i.name)
-  }))
+  })),
+  suspiciousComments: (document.documentElement.innerHTML.match(/<!--[\\s\\S]*?-->/g) || [])
+    .filter(c => /(todo|fixme|hack|password|secret|senha|key|token|internal|api[_-]?key)/i.test(c))
 }))()"
 ```
+
+`suspiciousComments` captura comentarios HTML deixados em producao (`<!-- TODO: trocar a chave ... -->`): mascare o segredo antes de registrar (regra 4).
 
 Verifique tambem na lista de `requests` e `response-body`:
 - Arquivos `.js.map` (Source Maps) acessiveis em producao expondo o codigo-fonte original.
 - Chaves privadas ou credenciais hardcoded no bundle JS ou no objeto de hidratacao (`__NEXT_DATA__`, `window.__ENV`).
-- Caminhos sensiveis publicamente acessiveis (`/robots.txt`, `/sitemap.xml`, `/.well-known/security.txt`, endpoints `/graphql`, `/swagger`, `/api-docs` ou `/.env` que devem retornar 404/403).
+- Caminhos sensiveis publicamente acessiveis que deveriam retornar 404/403: `/robots.txt`, `/sitemap.xml`, `/.well-known/security.txt`, `/graphql`, `/swagger`, `/api-docs`, `/.env`, `/web.config`, `/appsettings.Development.json`.
+- **Controle de versao exposto** (vaza o codigo-fonte completo): `/.git/HEAD`, `/.svn/entries`.
+- **Endpoints de debug/metadados por stack**: `/actuator/env`, `/actuator/health` (Spring), `/trace.axd`, `/elmah.axd` (ASP.NET).
 
 ### Fase 6: Seguranca de Formularios, Autenticacao e Sessao
 
@@ -202,8 +222,24 @@ playwright-cli -s=sec-audit response-body <index>
 Procure por:
 - **Excessive Data Exposure (OWASP API3)** — registre so os nomes dos campos, nunca os valores (regra 4): APIs retornando campos internos (`password_hash`, `role`, `internal_notes`, `cpf`, `email` de outros usuarios) que a UI apenas oculta visualmente.
 - **Cache indevido de dados sensiveis**: respostas autenticadas sem `Cache-Control: no-store, private`.
-- **Stack traces e erros verbosos**: respostas `4xx`/`5xx` expondo nomes de tabelas SQL, caminhos de arquivos do servidor ou versoes de bibliotecas.
+- **Stack traces e erros verbosos**: respostas `4xx`/`5xx` expondo nomes de tabelas SQL, caminhos de arquivos do servidor ou versoes de bibliotecas. Nas respostas de erro que a aplicacao ja devolve (sem injetar nada), procure impressao digital de SGBD com `/(ORA-\d|SQLSTATE|Microsoft SQL|Incorrect syntax|Unclosed quotation|syntax error at|PG::|mysqli?_)/i` — o vazamento indica mensagens de erro nao tratadas.
 - **Rotas desprotegidas**: abra uma segunda aba ou limpe o estado (`delete-data`) e navegue diretamente para rotas internas descobertas na sessao autenticada ou no bundle, para verificar se o bloqueio ocorre no servidor ou apenas visualmente no cliente. Compare com a linha de base nao autenticada da Fase 1 e, havendo segunda conta, com a sessao `-s=sec-audit-b`.
+
+#### Open Redirect (redirecionamento nao validado)
+
+Parametros de redirecionamento que aceitam destino externo permitem phishing e roubo de token via `Referer`. O teste e **nao destrutivo**: navegue com o parametro e observe o destino final em `window.location.href`, sem submeter credenciais ou dados. Procure parametros como `redirect`, `url`, `next`, `return`, `returnUrl`, `goto`, `dest`, `destination`, `continue`, `callback` (em query strings, links e fluxos de login/logout):
+
+```bash
+# Destino externo direto
+playwright-cli -s=sec-audit goto "https://alvo-autorizado.exemplo/login?redirect=https://origem-nao-confiavel.example"
+playwright-cli -s=sec-audit eval "location.origin"
+
+# Variantes de bypass (host externo escondido)
+playwright-cli -s=sec-audit goto "https://alvo-autorizado.exemplo/login?redirect=//origem-nao-confiavel.example"
+playwright-cli -s=sec-audit eval "location.origin"
+```
+
+Se `location.origin` deixar de ser o alvo, o redirecionamento externo foi aceito. Severidade: destino externo arbitrario e **Alta**; apenas path interno arbitrario (sem sair da origem) e **Media**. Outras variantes a testar: `/\origem-nao-confiavel.example`, `https://alvo-autorizado.exemplo@origem-nao-confiavel.example`.
 
 ### Fase 8: Encerramento e Limpeza
 
@@ -228,11 +264,17 @@ Se o usuario autenticou, recomende que ele encerre a sessao da conta de teste no
 | Severidade | Criterio | Exemplos Tipicos |
 | :--- | :--- | :--- |
 | **Critica** | Comprometimento imediato de dados sensiveis, contas ou infraestrutura sem interacao complexa | Credenciais/chaves secretas de backend expostas no bundle, rota administrativa aberta sem autenticacao, CORS refletindo origem arbitraria com credenciais |
-| **Alta** | Risco direto a sessoes de usuarios, dados pessoais ou controle de acesso | JWT/token de sessao em `localStorage` combinado com ausencia de CSP, cookie de sessao sem `HttpOnly`/`Secure`, Source Maps expondo logica sensivel ou segredos, API vazando PII de outros usuarios |
+| **Alta** | Risco direto a sessoes de usuarios, dados pessoais ou controle de acesso | JWT/token de sessao em `localStorage` combinado com ausencia de CSP, cookie de sessao sem `HttpOnly`/`Secure`, Source Maps expondo logica sensivel ou segredos, API vazando PII de outros usuarios, open redirect para dominio externo arbitrario, `.git`/`.svn` ou Source Maps expostos vazando codigo-fonte |
 | **Media** | Ausencia de defesa em profundidade ou configuracao fragil exploravel em cadeia | Ausencia de CSP, HSTS ou `X-Frame-Options`, CSRF sem `SameSite`/token, scripts de terceiros sem SRI (`integrity`), enumeracao de usuarios no login |
 | **Baixa / Info** | Hardening recomendado e higiene de metadados | `Server`/`X-Powered-By` expondo versao, `Referrer-Policy` ou `Permissions-Policy` ausentes, links `target="_blank"` sem `rel="noopener"` |
+
+## Saida do Relatorio
+
+Grave o entregavel final na pasta `.tmp/` do diretorio de trabalho atual, nunca na raiz do projeto nem em pasta versionada: `.tmp/relatorio-seguranca-<alvo>-<AAAA-MM-DD>.md` (ex.: `.tmp/relatorio-seguranca-exemplo-2025-10-27.md`). Crie `.tmp/` se nao existir.
+
+O relatorio contem achados sensiveis (segredos ja mascarados, endpoints, nomes de campos expostos), entao antes de escrever confirme que `.tmp/` esta no `.gitignore` do projeto alvo; se nao estiver, adicione a linha `.tmp/` antes de gravar. Nunca commite o relatorio.
 
 ## Referencias e Templates sob Demanda
 
 - Para o catalogo detalhado de verificacoes por categoria do OWASP Top 10:2025, scripts `eval` de inspecao e recomendacoes de correcao, leia `references/owasp-playwright-checks.md`.
-- Para estruturar o entregavel final com evidencias, severidade e plano de acao, use o modelo em `templates/security-audit-report.md`.
+- Para estruturar o entregavel final com evidencias, severidade e plano de acao, use o modelo em `templates/security-audit-report.md` e salve o resultado preenchido em `.tmp/` (ver secao "Saida do Relatorio").

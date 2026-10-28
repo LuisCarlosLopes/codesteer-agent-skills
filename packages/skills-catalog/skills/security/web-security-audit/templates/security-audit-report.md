@@ -41,7 +41,8 @@ Descreva em 3 a 5 linhas a postura geral de seguranca observada na aplicacao, de
 | **Cookies & Storage** | Flags `HttpOnly`, `Secure`, `SameSite` e ausencia de segredos em `localStorage` | `{{STATUS_STORAGE}}` | `{{OBS_STORAGE}}` |
 | **Exposicao no Cliente** | Bundles JS, Source Maps, objetos globais, `console` e SRI em scripts externos | `{{STATUS_CLIENT}}` | `{{OBS_CLIENT}}` |
 | **Autenticacao & Formularios** | Protecao CSRF, autocomplete, enumeracao de conta e invalidacao no logout | `{{STATUS_AUTH}}` | `{{OBS_AUTH}}` |
-| **APIs & Controle de Acesso** | CORS, exposicao excessiva de dados (PII), cache de respostas e erros verbosos | `{{STATUS_API}}` | `{{OBS_API}}` |
+| **APIs & Controle de Acesso** | CORS (incl. reflexao de origem), exposicao excessiva de dados (PII), cache de respostas e erros verbosos | `{{STATUS_API}}` | `{{OBS_API}}` |
+| **Redirecionamento & Metadados** | Open redirect em parametros, exposicao de `.git`/`.svn`, endpoints de debug e comentarios HTML | `{{STATUS_REDIRECT}}` | `{{OBS_REDIRECT}}` |
 
 ---
 
